@@ -155,7 +155,16 @@
 <<introduction, child='chapters/introduction.Rnw', eval=TRUE, fig.path='graphics/'>>=
 @
 
+<<bioaccumulation, child='chapters/bioaccumulation.Rnw', eval=TRUE, fig.path='graphics/'>>=
+@
+
+<<chronic, child='chapters/chronic.Rnw', eval=TRUE, fig.path='graphics/'>>=
+@
+
 <<dose_response, child='chapters/dose_response.Rnw', eval=TRUE, fig.path='graphics/'>>=
+@
+
+<<population, child='chapters/population.Rnw', eval=TRUE, fig.path='graphics/'>>=
 @
 
 <<community_effects, child='chapters/community_effects.Rnw', eval=TRUE, fig.path='graphics/'>>=
