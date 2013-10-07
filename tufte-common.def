@@ -1526,9 +1526,9 @@
 \titleformat{\chapter}%
   [display]% shape
   {\relax\ifthenelse{\NOT\boolean{@tufte@symmetric}}{\begin{fullwidth}}{}}% format applied to label+text
-  {\itshape\huge\thechapter}% label
+  {\bf\huge\thechapter}% label
   {0pt}% horizontal separation between label and title body
-  {\huge\rmfamily\itshape}% before the title body
+  {\huge\rmfamily\bf}% before the title body
   [\ifthenelse{\NOT\boolean{@tufte@symmetric}}{\end{fullwidth}}{}]% after the title body
 
 \titleformat{\section}%
