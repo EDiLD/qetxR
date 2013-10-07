@@ -1,0 +1,17 @@
+\chapter{Introduction}
+
+This is R, programming is not optional, but rather expected. [http://wiekvoet.blogspot.de/2013/10/influence-analysis-for-repeated.html]
+
+
+<<>>=
+1+1
+@
+
+
+\newpage
+
+lalalalal
+<<>>=
+1+1
+@
+
