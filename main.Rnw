@@ -211,7 +211,8 @@
 \mainmatter
 
 <<setup, include=FALSE, cache=FALSE>>=
-opts_chunk$set(fig.align='center', par=TRUE, warning=FALSE, message=FALSE, error=FALSE)
+opts_chunk$set(fig.align='center', par=TRUE, warning=FALSE, message=FALSE, 
+               error=FALSE, cache=TRUE)
 options(width=55)
 opts_knit$set(self.contained=FALSE)
 @

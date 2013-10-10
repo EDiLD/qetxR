@@ -13,9 +13,35 @@ Here we will analyze the pyrifos data set from the publication\cite{van_den_brin
 <<pyrifos_load>>=
 require(vegan)
 data(pyrifos)
-head(pyrifos[, c(1:10)])
+head(pyrifos[, c(1:8)])
+dim(pyrifos)
+@
+
+<<pyrifos_env>>=
+ditch <- gl(12, 1, length=132)
+week <- gl(11, 12, labels=c(-4, -1, 0.1, 1, 2, 4, 8, 12, 15, 19, 24))
+dose <- factor(rep(c(0.1, 0, 0, 0.9, 0, 44, 6, 0.1, 44, 0.9, 0, 6), 11))
+pyrifos_env <- data.frame(ditch, week, dose)
 
 @
+
+<<pyrifos_prc>>=
+pyrifos_prc <- prc(response = pyrifos, treatment = dose, time = week)
+pyrifos_prc_sum <- summary(pyrifos_prc, scaling = 1)
+@
+
+<<pyrifos_plot_src, dev='pdf', out.width='\\linewidth', eval=FALSE>>=
+plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1)
+@
+
+\begin{figure}
+<<pyrifos_plot, dev='pdf', out.width='\\linewidth', echo=FALSE>>=
+plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1, lwd = 2, cex = 1.2)
+@
+\caption{Principal response curves (PRC) with species weights for the pyrifos
+data set indicating the effects of the insecticide on the invertebrate community.}
+\end{figure}
+
 
 
 

@@ -134,6 +134,8 @@
 \makeindex
 
 %citations
+% do not repeat full citations
+% http://tex.stackexchange.com/questions/45868/can-i-automatically-generate-abbreviated-citations-in-tufte-documents-after-the/45878#45878
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{etoolbox}% provides some support for comma-separated lists
 
@@ -419,7 +421,7 @@ Here we will analyze the pyrifos data set from the publication\cite{van_den_brin
 \begin{alltt}
 \hlkwd{require}\hlstd{(vegan)}
 \hlkwd{data}\hlstd{(pyrifos)}
-\hlkwd{head}\hlstd{(pyrifos[,} \hlkwd{c}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{10}\hlstd{)])}
+\hlkwd{head}\hlstd{(pyrifos[,} \hlkwd{c}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{8}\hlstd{)])}
 \end{alltt}
 \begin{verbatim}
 ##        Simve Daplo Cerpu Alogu Aloco Alore Aloaf Copsp
@@ -429,16 +431,66 @@ Here we will analyze the pyrifos data set from the publication\cite{van_den_brin
 ## w.4.c4 2.398     0     0     0     0     0     0 3.296
 ## w.4.c5 4.025     0     0     0     0     0     0 3.466
 ## w.4.c6 2.303     0     0     0     0     0     0 2.197
-##        Ostsp Slyla
-## w.4.c1 0.000 1.386
-## w.4.c2 0.000 0.000
-## w.4.c3 0.000 0.693
-## w.4.c4 0.693 0.000
-## w.4.c5 0.000 0.000
-## w.4.c6 0.000 0.000
+\end{verbatim}
+\begin{alltt}
+\hlkwd{dim}\hlstd{(pyrifos)}
+\end{alltt}
+\begin{verbatim}
+## [1] 132 178
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{ditch} \hlkwb{<-} \hlkwd{gl}\hlstd{(}\hlnum{12}\hlstd{,} \hlnum{1}\hlstd{,} \hlkwc{length} \hlstd{=} \hlnum{132}\hlstd{)}
+\hlstd{week} \hlkwb{<-} \hlkwd{gl}\hlstd{(}\hlnum{11}\hlstd{,} \hlnum{12}\hlstd{,} \hlkwc{labels} \hlstd{=} \hlkwd{c}\hlstd{(}\hlopt{-}\hlnum{4}\hlstd{,} \hlopt{-}\hlnum{1}\hlstd{,} \hlnum{0.1}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{2}\hlstd{,} \hlnum{4}\hlstd{,} \hlnum{8}\hlstd{,} \hlnum{12}\hlstd{,}
+    \hlnum{15}\hlstd{,} \hlnum{19}\hlstd{,} \hlnum{24}\hlstd{))}
+\hlstd{dose} \hlkwb{<-} \hlkwd{factor}\hlstd{(}\hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{0.9}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{44}\hlstd{,} \hlnum{6}\hlstd{,} \hlnum{0.1}\hlstd{,} \hlnum{44}\hlstd{,}
+    \hlnum{0.9}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{6}\hlstd{),} \hlnum{11}\hlstd{))}
+\hlstd{pyrifos_env} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(ditch, week, dose)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{pyrifos_prc} \hlkwb{<-} \hlkwd{prc}\hlstd{(}\hlkwc{response} \hlstd{= pyrifos,} \hlkwc{treatment} \hlstd{= dose,}
+    \hlkwc{time} \hlstd{= week)}
+\hlstd{pyrifos_prc_sum} \hlkwb{<-} \hlkwd{summary}\hlstd{(pyrifos_prc,} \hlkwc{scaling} \hlstd{=} \hlnum{1}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{plot}\hlstd{(pyrifos_prc,} \hlkwc{select} \hlstd{=} \hlkwd{abs}\hlstd{(pyrifos_prc_sum}\hlopt{$}\hlstd{sp)} \hlopt{>} \hlnum{1}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{figure}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\linewidth]{graphics/pyrifos_plot} 
+
+}
+
+
+
+\end{knitrout}
+
+\caption{Principal response curves (PRC) with species weights for the pyrifos
+data set indicating the effects of the insecticide on the invertebrate community.}
+\end{figure}
 
 
 
@@ -486,8 +538,9 @@ Here we will analyze the pyrifos data set from the publication\cite{van_den_brin
 ## [4] qetx_0.0.1      knitr_1.5      
 ## 
 ## loaded via a namespace (and not attached):
-## [1] evaluate_0.5.1 formatR_0.9    grid_3.0.2    
-## [4] highr_0.2.1    stringr_0.6.2  tools_3.0.2
+## [1] codetools_0.2-8 digest_0.6.3    evaluate_0.5.1 
+## [4] formatR_0.9     grid_3.0.2      highr_0.2.1    
+## [7] stringr_0.6.2   tools_3.0.2
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
