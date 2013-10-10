@@ -2,6 +2,22 @@
 
 \section{Species Richness}
 
-\section{Analysing mesocosm data}
+\section{Analyzing mesocosm data}
+Principle Response Curves (PRC)\cite{van_den_brink_principal_1999} are commonly
+used for analyzing ecotoxicological mesocosm experiments. PRC is just a 
+special form of Redundancy Analysis (RDA) and analyses the multivariate response
+to a treatment over time \cite{legendre_numerical_2013}.
+
+Here we will analyze the pyrifos data set from the publication\cite{van_den_brink_principal_1999} which is shipped with the vegan package.
+
+<<pyrifos_load>>=
+require(vegan)
+data(pyrifos)
+head(pyrifos[, c(1:10)])
+
+@
+
+
+
 
 \section{Species Sensitivity Distributions}
