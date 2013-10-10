@@ -1,4 +1,4 @@
 \chapter{R Session Info}
-<<>>=
+<<sessionInfo>>=
 sessionInfo()
 @

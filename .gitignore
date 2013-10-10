@@ -33,3 +33,6 @@ qetxR.Rproj
 # knitr
 cache/*
 knitr.sty
+
+# keep only .Rnw and pdf
+.tex

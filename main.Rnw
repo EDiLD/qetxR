@@ -134,6 +134,8 @@
 \makeindex
 
 %citations
+% do not repeat full citations
+% http://tex.stackexchange.com/questions/45868/can-i-automatically-generate-abbreviated-citations-in-tufte-documents-after-the/45878#45878
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{etoolbox}% provides some support for comma-separated lists
 

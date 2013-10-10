@@ -132,7 +132,63 @@
 % Generates the index
 \usepackage{makeidx}
 \makeindex
+
+%citations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{etoolbox}% provides some support for comma-separated lists
+
+\makeatletter
+% We'll keep track of the old/seen bibkeys here.
+\def\@tufte@old@bibkeys{}
+
+% This macro prints the full citation if it's the first time it's been used
+% and a shorter citation if it's been used before.
+\newcommand{\@tufte@print@margin@citation}[1]{%
+  % print full citation if bibkey is not in the old bibkeys list
+  \ifinlist{#1}{\@tufte@old@bibkeys}{%
+    \citealp{#1}% print short entry
+  }{%
+    \bibentry{#1}% print full entry
+  }%
+  % add bibkey to the old bibkeys list
+  \listgadd{\@tufte@old@bibkeys}{#1}%
+}
+
+% We've modified this Tufte-LaTeX macro to call \@tufte@print@margin@citation
+% instead of \bibentry.
+\renewcommand{\@tufte@normal@cite}[2][0pt]{%
+  % Snag the last bibentry in the list for later comparison
+  \let\@temp@last@bibkey\@empty%
+  \@for\@temp@bibkey:=#2\do{\let\@temp@last@bibkey\@temp@bibkey}%
+  \sidenote[][#1]{%
+    % Loop through all the bibentries, separating them with semicolons and spaces
+    \normalsize\normalfont\@tufte@citation@font%
+    \setcounter{@tufte@num@bibkeys}{0}%
+    \@for\@temp@bibkeyx:=#2\do{%
+      \ifthenelse{\equal{\@temp@last@bibkey}{\@temp@bibkeyx}}{%
+        \ifthenelse{\equal{\value{@tufte@num@bibkeys}}{0}}{}{and\ }%
+        \@tufte@trim@spaces\@temp@bibkeyx% trim spaces around bibkey
+        \@tufte@print@margin@citation{\@temp@bibkeyx}%
+      }{%
+        \@tufte@trim@spaces\@temp@bibkeyx% trim spaces around bibkey
+        \@tufte@print@margin@citation{\@temp@bibkeyx};\space
+      }%
+      \stepcounter{@tufte@num@bibkeys}%
+    }%
+  }%
+}
+
+
+% Calling this macro will reset the list of remembered citations. This is
+% useful if you want to revert to full citations at the beginning of each
+% chapter.
+\newcommand{\resetcitations}{%
+  \gdef\@tufte@old@bibkeys{}%
+}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
 
 \begin{document}
 % Front matter
@@ -253,20 +309,24 @@ case you do not have to assign the data to a name.}:
 \end{knitrout}
 
 
-So there are 21 measurements with a mean of 5.1 mg/L and a standard deviation 
-of 2.1 mg/L. 
+
+
+
+
+So there are 21 measurements with a mean of 5.12 mg/L and a standard deviation of 2.14 mg/L. 
 
 Suppose we have a detection limit of 2.5 mg/L and want to winsorize values below
-LOD.
+LOD, i.e. replace the two lowest values by 2.6 mg/L and the two highest values by 
+7.7 mg/L.
 
 \newpage
-To compute winsorized values we use \verb|winsor| function from the \verb|qetx| 
-package.
+
+Happily there is function in the \verb|qetx| to do this for us: \verb|winsor()|.
 This function takes a vector of values and a second argument specifying how 
 many values should be winsorized (either by giving a LOD-value or the number of
-values on each side) \sidenote{Take a look what computations are performed by 
-looking at the source of this function - type the function name into the 
-console}.
+values on each side) \sidenote{Look at the source of this function
+-~type the function name into the console~- to see which 
+computations are done.}.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -283,6 +343,9 @@ console}.
 \end{kframe}
 \end{knitrout}
 
+This give the expected results, moreover we see that on each end two observations
+where modified \sidenote{stored within the attribute 'width' of the resulting 
+vector. \bf{TODO: verbatim within sidenote}.}.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -307,6 +370,13 @@ console}.
 \end{kframe}
 \end{knitrout}
 
+
+
+
+
+The Winsorized mean $(\bar{x}_w)$ now is 5.08 mg/L, the standard 
+deviation of the modified data set (s) is 1.79 mg/L and the 
+Winsorized standard deviation $(s_w)$ 2.24 mg/L.
 
 
 
@@ -336,7 +406,43 @@ console}.
 
 \section{Species Richness}
 
-\section{Analysing mesocosm data}
+\section{Analyzing mesocosm data}
+Principle Response Curves (PRC)\cite{van_den_brink_principal_1999} are commonly
+used for analyzing ecotoxicological mesocosm experiments. PRC is just a 
+special form of Redundancy Analysis (RDA) and analyses the multivariate response
+to a treatment over time \cite{legendre_numerical_2013}.
+
+Here we will analyze the pyrifos data set from the publication\cite{van_den_brink_principal_1999} which is shipped with the vegan package.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{require}\hlstd{(vegan)}
+\hlkwd{data}\hlstd{(pyrifos)}
+\hlkwd{head}\hlstd{(pyrifos[,} \hlkwd{c}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{10}\hlstd{)])}
+\end{alltt}
+\begin{verbatim}
+##        Simve Daplo Cerpu Alogu Aloco Alore Aloaf Copsp
+## w.4.c1 3.951     0     0     0     0     0     0 2.773
+## w.4.c2 2.303     0     0     0     0     0     0 2.079
+## w.4.c3 4.595     0     0     0     0     0     0 3.761
+## w.4.c4 2.398     0     0     0     0     0     0 3.296
+## w.4.c5 4.025     0     0     0     0     0     0 3.466
+## w.4.c6 2.303     0     0     0     0     0     0 2.197
+##        Ostsp Slyla
+## w.4.c1 0.000 1.386
+## w.4.c2 0.000 0.000
+## w.4.c3 0.000 0.693
+## w.4.c4 0.693 0.000
+## w.4.c5 0.000 0.000
+## w.4.c6 0.000 0.000
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+
+
 
 \section{Species Sensitivity Distributions}
 
@@ -376,18 +482,24 @@ console}.
 ## [6] methods   base     
 ## 
 ## other attached packages:
-## [1] qetx_0.0.1 knitr_1.5 
+## [1] vegan_2.1-35    lattice_0.20-23 permute_0.7-4  
+## [4] qetx_0.0.1      knitr_1.5      
 ## 
 ## loaded via a namespace (and not attached):
-## [1] evaluate_0.5.1 formatR_0.9    highr_0.2.1   
-## [4] stringr_0.6.2  tools_3.0.2
+## [1] evaluate_0.5.1 formatR_0.9    grid_3.0.2    
+## [4] highr_0.2.1    stringr_0.6.2  tools_3.0.2
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
 
 
-%\bibliography{sample-handout}
-%\bibliographystyle{plainnat}
+% Bibliography
+\bibliographystyle{apalike}
+\begin{fullwidth}
+\bibliography{references}
+\end{fullwidth}
+
 \printindex
+
 \end{document}
