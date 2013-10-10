@@ -1,0 +1,62 @@
+\chapter{The Measurement Process}
+\section{Winsorized Mean and Standard Deviation}
+
+The following sulfate concentrations (mg/L) were measured during a routine 
+water quality survey of the Savannah River (South Carolina). 
+The data is available in the \verb|qetx| package \sidenote{Note that in this 
+case you do not have to assign the data to a name.}:
+
+<<so4_load>>=
+data(so4)
+@
+
+
+\begin{marginfigure}
+\vspace{10mm}
+<<so4_hist, dev='pdf', out.width='\\linewidth', echo=FALSE>>=
+hist(so4, breaks = 7, 
+     col = 'steelblue', 
+     xlab = expression(paste(SO[4], " [mg/L]")),
+     main = '')
+@
+\caption{A histogramm of the so4 data.}
+\end{marginfigure}
+
+
+<<so4_summary>>=
+so4
+length(so4)
+mean(so4)
+sd(so4)
+@
+
+So there are 21 measurements with a mean of 5.1 mg/L and a standard deviation 
+of 2.1 mg/L. 
+
+Suppose we have a detection limit of 2.5 mg/L and want to winsorize values below
+LOD.
+
+\newpage
+To compute winsorized values we use \verb|winsor| function from the \verb|qetx| 
+package.
+This function takes a vector of values and a second argument specifying how 
+many values should be winsorized (either by giving a LOD-value or the number of
+values on each side) \sidenote{Take a look what computations are performed by 
+looking at the source of this function - type the function name into the 
+console}.
+
+<<so4_winsor>>=
+so4_w <- winsor(so4, lod=2.5)
+so4_w
+@
+
+<<>>=
+mean(so4_w)
+sd(so4_w)
+sd_winsor(so4_w)
+@
+
+
+
+\section{Probability Plotting}
+

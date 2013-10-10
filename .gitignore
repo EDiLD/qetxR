@@ -29,3 +29,7 @@ qetxR.Rproj
 *.out
 *.synctex.gz
 *concordance.tex
+
+# knitr
+cache/*
+knitr.sty

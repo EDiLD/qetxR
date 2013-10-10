@@ -1,2 +1,7 @@
 \chapter{Community Effects}
 
+\section{Species Richness}
+
+\section{Analysing mesocosm data}
+
+\section{Species Sensitivity Distributions}

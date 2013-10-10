@@ -3,7 +3,7 @@
 %%
 % Book metadata
 \title{Quantitative Ecotoxicology}
-\subtitle{An R Companion}
+\subtitle{with R!}
 \author{Eduard Sz\"ocs}
 %\publisher{Publisher of This Book}
 
@@ -142,7 +142,7 @@
 
 % copyright page
 \newpage
-\include{frontbackmatter/copyright.tex}
+\input{frontbackmatter/copyright.tex}
 
 % contents
 \tableofcontents
@@ -152,7 +152,16 @@
 % Start the main matter (normal chapters)
 \mainmatter
 
+<<setup, include=FALSE, cache=FALSE>>=
+opts_chunk$set(fig.align='center', par=TRUE, warning=FALSE, message=FALSE, error=FALSE)
+options(width=55)
+opts_knit$set(self.contained=FALSE)
+@
+
 <<introduction, child='chapters/introduction.Rnw', eval=TRUE, fig.path='graphics/'>>=
+@
+
+<<measurement_process, child='chapters/measurement_process.Rnw', eval=TRUE, fig.path='graphics/'>>=
 @
 
 <<bioaccumulation, child='chapters/bioaccumulation.Rnw', eval=TRUE, fig.path='graphics/'>>=
@@ -174,6 +183,9 @@
 %%
 % The back matter contains appendices, bibliographies, indices, glossaries, etc.
 \backmatter
+\appendix
+<<appendix, child='frontbackmatter/appendix.Rnw', eval=TRUE, fig.path='graphics/'>>=
+@
 
 %\bibliography{sample-handout}
 %\bibliographystyle{plainnat}
