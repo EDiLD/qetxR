@@ -53,7 +53,7 @@ plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1, scaling = 1)
 plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1,scaling=1, lwd = 2, cex = 1.2)
 @
 \caption{Principal response curves (PRC) with species weights for the pyrifos
-data set indicating the effects of the insecticide on the invertebrate community.}
+data set indicating effects of the insecticide on the invertebrate community.}
 \end{figure}
 
 The plot shows on the x axis the time and on the y-axis the difference from the 
@@ -185,8 +185,10 @@ permutations <- shuffleSet(nrow(pyrifos), control = control)
 This can be passed to permutest, testing the first eigenvalue of our model.
 \sidenote{At the moment the permute-package isn't fully hooked up into vegan. vegan is in active development and hopefully in the future we will be able to directly pass our permutation scheme.}
 
-<<pyrifos_permutest>>=
-mod_perm <- permutest(pyrifos_prc, permutations = permutations, first = TRUE)
+<<pyrifos_permutest, tidy=FALSE>>=
+mod_perm <- permutest(pyrifos_prc, 
+                      permutations = permutations, 
+                      first = TRUE)
 mod_perm
 @
 
@@ -194,9 +196,25 @@ We see that our first axis shows us a statistically significant amount of variat
 The minimum p-value that we could get is 0.01 (=1/no. of permutations).
 \todo{Hier noch mehr erklären}.
 
-\subsection{Effects per week}
 
-We may also be interested at which time-points there is an effect on communities.
+\subsection{Effects per week}
+After looking at the overall treatment effect, we may want to look at effects at individual time-points. 
+We follow here \cite{van_den_brink_principal_1999} and use the ln-transformed nominal dose as continuous explanatory variable \sidenote{Beforehand we have to convert dose from a factor to a numeric vector via as.numeric(levels(x))[x]}.
+
+<<pyrifos_dosetransform>>=
+dose_c <- log(20 * as.numeric(levels(dose))[dose] + 1)
+@
+
+No we could program a for-loop and compute for every week a RDA and a permutation test. However there is a convenience function in the \verb|qetx| package:
+
+<<pyrifos_rda_pw>>=
+rdas <- rda_per_time(pyrifos, dose_c, week)
+@
+
+
+<<pyrifos_pvals>>=
+sapply(rdas, function(x) x$anova[1, 5])
+@
 
 
 \subsection{Other methods}
