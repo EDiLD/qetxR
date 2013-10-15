@@ -5,6 +5,7 @@
 qetxR.Rproj
 
 # Latex
+*.tdo
 *.aux
 *.glo
 *.idx

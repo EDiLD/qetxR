@@ -3,27 +3,41 @@
 \section{Species Richness}
 
 \section{Analyzing mesocosm data}
+\subsection{Introduction}
 Principle Response Curves (PRC)\cite{van_den_brink_principal_1999} are commonly
-used for analyzing ecotoxicological mesocosm experiments. PRC is just a 
-special form of Redundancy Analysis (RDA) and analyses the multivariate response
-to a treatment over time \cite{legendre_numerical_2013}.
+used for analyzing ecotoxicological mesocosm experiments. PRC analyses the 
+change of a community due to a treatment over time and is a special form of 
+Redundancy Analysis (RDA) \cite{legendre_numerical_2013}.
 
-Here we will analyze the pyrifos data set from the publication\cite{van_den_brink_principal_1999} which is shipped with the vegan package.
+
+\subsection{Example data}
+Here we will analyze the pyrifos data set from the publication
+\cite{van_den_brink_principal_1999} which is shipped with the vegan package. 
+\todo{Describe experiment}
 
 <<pyrifos_load>>=
 require(vegan)
 data(pyrifos)
 head(pyrifos[, c(1:8)])
-dim(pyrifos)
 @
+
+So rows correspond to samplings and colums are the species (with abbreviated 
+names), a usual species x sites matrix. The columnames code treatment and time, 
+but we will create a separate data.frame with information about experimental 
+ditch, sampling time and treatment: 
 
 <<pyrifos_env>>=
 ditch <- gl(12, 1, length=132)
 week <- gl(11, 12, labels=c(-4, -1, 0.1, 1, 2, 4, 8, 12, 15, 19, 24))
 dose <- factor(rep(c(0.1, 0, 0, 0.9, 0, 44, 6, 0.1, 44, 0.9, 0, 6), 11))
 pyrifos_env <- data.frame(ditch, week, dose)
-
 @
+
+
+\subsection{Overall pattern}
+With this a hand we can easily calculate and plot \sidenote{Note that only 
+species with scores greater or smaller than 1 are displayed to avoid cluttering 
+of the plot} the PRC using the prc() function:
 
 <<pyrifos_prc>>=
 pyrifos_prc <- prc(response = pyrifos, treatment = dose, time = week)
@@ -31,19 +45,177 @@ pyrifos_prc_sum <- summary(pyrifos_prc, scaling = 1)
 @
 
 <<pyrifos_plot_src, dev='pdf', out.width='\\linewidth', eval=FALSE>>=
-plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1)
+plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1, scaling = 1)
 @
 
 \begin{figure}
-<<pyrifos_plot, dev='pdf', out.width='\\linewidth', echo=FALSE>>=
-plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1, lwd = 2, cex = 1.2)
+<<pyrifos_plot, dev='pdf', out.width='\\linewidth', echo=FALSE, fig.width=8>>=
+plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1,scaling=1, lwd = 2, cex = 1.2)
 @
 \caption{Principal response curves (PRC) with species weights for the pyrifos
 data set indicating the effects of the insecticide on the invertebrate community.}
 \end{figure}
 
+The plot shows on the x axis the time and on the y-axis the difference from the 
+control treatments. The farther apart from the x-axis the more different are the 
+communities compared to the control.
+
+We see a clearly treatment-related effect: After application at week 0 the 
+treated communities rapidly change treatment dependent. However to the end of 
+the experiment the treated and the control get similar again, which indicates a 
+'recovery'.
+
+On the righthand side we see the species names and their scores. The more 
+extreme the scores the more this species contributed to the plotted differences. 
+However, you cannot directly infer from these species scores which species are more
+susceptible. For example \textit{Gammarus pulex} (gammapule) has a relatively 
+low scores, although it's response pattern (Figure \ref{fig:prc}) show a strong
+response with no recovery. PRC displays global pattern in the community, but the 
+pattern of \textit{G. pulex} is different from most other species, therefore it 
+gets a lower species scores.
+
+\begin{marginfigure}
+<<pyrifos_gammarus, echo=FALSE, fig.width=14>>=
+df <- data.frame(pyrifos_env, gammpule = pyrifos$gammpule, caenhora = pyrifos$caenhora)
+require(reshape2)
+dfm <- melt(df)
+dfm$week <- as.numeric(as.character(dfm$week))
+require(ggplot2)
+
+ggplot(dfm, aes(x = week, y = value, col = dose)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~variable) +
+  ylab('Abundance') +
+  mytheme()
+@
+\caption{Different responses of \textit{Gammarus pulex} and \textit{Caenis horaria} during 
+the experiment to chlorpyrifos treatments.}
+\label{fig:prc}
+\end{marginfigure}
+
+
+We can also look at the numerical output\sidenote{Only a shortened output is 
+given here.} for this plot using the summary method:
+<<pyrifos_sum, eval=FALSE>>=
+pyrifos_prc_sum
+@
+
+<<pyrifos_sum2, eval=TRUE, echo=FALSE>>=
+pyrifos_prc_sum2 <- pyrifos_prc_sum
+pyrifos_prc_sum2$sp <- pyrifos_prc_sum2$sp[abs(pyrifos_prc_sum2$sp) > 1.9]
+pyrifos_prc_sum2$coefficients <- pyrifos_prc_sum2$coefficients[ ,1:6]
+pyrifos_prc_sum2
+@
+
+
+The output of prc() gives us more detailed information about the RDA model:
+<<pyrifos_expl2, eval=FALSE>>=
+pyrifos_prc
+@
+<<pyrifos_expl, echo=FALSE>>=
+pyrifos_prc2 <- pyrifos_prc
+pyrifos_prc2$CCA$eig <- pyrifos_prc2$CCA$eig[1:8]
+pyrifos_prc2
+@
+
+We see that 
+\Sexpr{round(pyrifos_prc$pCCA$tot.chi/pyrifos_prc$tot.chi * 100, 1)}
+\% of the variance can be attributed to time (Conditional),
+\Sexpr{round(pyrifos_prc$CCA$tot.chi/pyrifos_prc$tot.chi * 100, 1)}
+\% can be explaind by the treatment regime (Constrained) and 
+\Sexpr{round((pyrifos_prc$tot.chi - pyrifos_prc$CCA$tot.chi - pyrifos_prc$pCCA$tot.chi)/pyrifos_prc$tot.chi* 100, 1)}
+\% of residual variance (Unconstrained), which cannot be explained by time and 
+treatment.
+
+The first RDA axis has an eigenvalue of 
+\Sexpr{round(pyrifos_prc$CCA$eig[1], 1)}. If we divide this eigenvalue by the sum
+of all eigenvalues, we get the proportion of explained variance which is displayed
+on the first axis\sidenote{rda() (and therefore als prc()) returns a huge object 
+with all kind of information stored in it. See ?cca.object for the internal structure. 
+Here I directly access the eigenvalues from this object}:
+
+<<pyrifos_RDA1>>=
+pyrifos_prc$CCA$eig[1] / sum(pyrifos_prc$CCA$eig) * 100
+@
+
+The significance of the PRC diagram can be tested via permuations.
+However observations from a experimental ditch are not independent, since the same ditch was measured repeatedly during the experiment. 
+We have to take this into account: each ditch represents a time-series.
+We will permute the whole series of one ditch, keeping the temporal order.
+
+For example, if we have 3 ditches observed for 4 weeks:
+<<pyrifos_perm_ex1, echo=FALSE>>=
+df <- data.frame(ditch = gl(3,4), week = rep(1:4, 3))
+df
+@
+
+One possible permutation would be
+<<pyrifos_perm_ex2, echo=FALSE>>=
+ctrl <- how(within=Within(type='none'), plots = Plots(strata=df$ditch, type='free'))
+set.seed(1214)
+df[shuffle(12, ctrl), ]
+@
+
+
+To setup such a permutation scheme we use the permute package, which automatically loaded with vegan:
+
+<<pyrifos_permcontrol>>=
+control = how(plots = Plots(strata = ditch, type = "free"),
+              within = Within(type = "none"),
+              nperm = 99)
+@
+
+\marginnote{
+This sets up our permutation scheme:
+\begin{description}
+  \item[plots]{We will permute ditches, without any restrictions.}
+  \item[within]{But within one ditch there will be no permutations}
+  \item[nperm]{We want 99 permutations}
+\end{description}
+}
+
+With this setup we can create a permutation matrix. 
+Each row therein is one permuation, the values are the rownumbers of the original data set.
+<<pyrifos_perm>>=
+set.seed(1234)
+permutations <- shuffleSet(nrow(pyrifos), control = control)
+@
+
+This can be passed to permutest, testing the first eigenvalue of our model.
+\sidenote{At the moment the permute-package isn't fully hooked up into vegan. vegan is in active development and hopefully in the future we will be able to directly pass our permutation scheme.}
+
+<<pyrifos_permutest>>=
+mod_perm <- permutest(pyrifos_prc, permutations = permutations, first = TRUE)
+mod_perm
+@
+
+We see that our first axis shows us a statistically significant amount of variation. 
+The minimum p-value that we could get is 0.01 (=1/no. of permutations).
+\todo{Hier noch mehr erklären}.
+
+\subsection{Effects per week}
+
+We may also be interested at which time-points there is an effect on communities.
+
+
+\subsection{Other methods}
+
+Other methods to analyse mesocosm experiments include:
+
+\begin{description}
+  \item[multivariate GLMs]{\cite{warton_distance-based_2011, wang_mvabund-_2012} In R: mvabund-package.}
+  \item[trait-based indicators]{\cite{liess_traits_2011} Currently no package, but look at rspear-package.}
+  \item[community endpoints]{\cite{sanchez-bayo_evaluation_2012} Can use vegan for all computations.}
+\end{description}
 
 
 
 
 \section{Species Sensitivity Distributions}
+<<ssd_load>>=
+require(fitdistrplus)
+# or
+require(drc)
+@
+

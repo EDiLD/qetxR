@@ -133,6 +133,9 @@
 \usepackage{makeidx}
 \makeindex
 
+% Todo Notes
+\usepackage{todonotes}
+
 %citations
 % do not repeat full citations
 % http://tex.stackexchange.com/questions/45868/can-i-automatically-generate-abbreviated-citations-in-tufte-documents-after-the/45878#45878
@@ -140,20 +143,17 @@
 \usepackage{etoolbox}% provides some support for comma-separated lists
 
 \makeatletter
-% We'll keep track of the old/seen bibkeys here.
-\def\@tufte@old@bibkeys{}
 
-% This macro prints the full citation if it's the first time it's been used
-% and a shorter citation if it's been used before.
+% use only shorter citation
 \newcommand{\@tufte@print@margin@citation}[1]{%
   % print full citation if bibkey is not in the old bibkeys list
-  \ifinlist{#1}{\@tufte@old@bibkeys}{%
+  %\ifinlist{#1}{\@tufte@old@bibkeys}{%
     \citealp{#1}% print short entry
-  }{%
-    \bibentry{#1}% print full entry
-  }%
+  %}{%
+  %  \bibentry{#1}% print full entry
+  %}%
   % add bibkey to the old bibkeys list
-  \listgadd{\@tufte@old@bibkeys}{#1}%
+  %\listgadd{\@tufte@old@bibkeys}{#1}%
 }
 
 % We've modified this Tufte-LaTeX macro to call \@tufte@print@margin@citation
@@ -193,6 +193,9 @@
 
 
 \begin{document}
+%Todo-notes
+\listoftodos
+
 % Front matter
 \frontmatter
 
@@ -210,6 +213,10 @@
 
 % Start the main matter (normal chapters)
 \mainmatter
+
+
+
+
 
 
 
@@ -409,12 +416,17 @@ Winsorized standard deviation $(s_w)$ 2.24 mg/L.
 \section{Species Richness}
 
 \section{Analyzing mesocosm data}
+\subsection{Introduction}
 Principle Response Curves (PRC)\cite{van_den_brink_principal_1999} are commonly
-used for analyzing ecotoxicological mesocosm experiments. PRC is just a 
-special form of Redundancy Analysis (RDA) and analyses the multivariate response
-to a treatment over time \cite{legendre_numerical_2013}.
+used for analyzing ecotoxicological mesocosm experiments. PRC analyses the 
+change of a community due to a treatment over time and is a special form of 
+Redundancy Analysis (RDA) \cite{legendre_numerical_2013}.
 
-Here we will analyze the pyrifos data set from the publication\cite{van_den_brink_principal_1999} which is shipped with the vegan package.
+
+\subsection{Example data}
+Here we will analyze the pyrifos data set from the publication
+\cite{van_den_brink_principal_1999} which is shipped with the vegan package. 
+\todo{Describe experiment}
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -432,15 +444,14 @@ Here we will analyze the pyrifos data set from the publication\cite{van_den_brin
 ## w.4.c5 4.025     0     0     0     0     0     0 3.466
 ## w.4.c6 2.303     0     0     0     0     0     0 2.197
 \end{verbatim}
-\begin{alltt}
-\hlkwd{dim}\hlstd{(pyrifos)}
-\end{alltt}
-\begin{verbatim}
-## [1] 132 178
-\end{verbatim}
 \end{kframe}
 \end{knitrout}
 
+
+So rows correspond to samplings and colums are the species (with abbreviated 
+names), a usual species x sites matrix. The columnames code treatment and time, 
+but we will create a separate data.frame with information about experimental 
+ditch, sampling time and treatment: 
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -456,6 +467,12 @@ Here we will analyze the pyrifos data set from the publication\cite{van_den_brin
 \end{knitrout}
 
 
+
+\subsection{Overall pattern}
+With this a hand we can easily calculate and plot \sidenote{Note that only 
+species with scores greater or smaller than 1 are displayed to avoid cluttering 
+of the plot} the PRC using the prc() function:
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -470,7 +487,8 @@ Here we will analyze the pyrifos data set from the publication\cite{van_den_brin
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{plot}\hlstd{(pyrifos_prc,} \hlkwc{select} \hlstd{=} \hlkwd{abs}\hlstd{(pyrifos_prc_sum}\hlopt{$}\hlstd{sp)} \hlopt{>} \hlnum{1}\hlstd{)}
+\hlkwd{plot}\hlstd{(pyrifos_prc,} \hlkwc{select} \hlstd{=} \hlkwd{abs}\hlstd{(pyrifos_prc_sum}\hlopt{$}\hlstd{sp)} \hlopt{>} \hlnum{1}\hlstd{,}
+    \hlkwc{scaling} \hlstd{=} \hlnum{1}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -492,11 +510,287 @@ Here we will analyze the pyrifos data set from the publication\cite{van_den_brin
 data set indicating the effects of the insecticide on the invertebrate community.}
 \end{figure}
 
+The plot shows on the x axis the time and on the y-axis the difference from the 
+control treatments. The farther apart from the x-axis the more different are the 
+communities compared to the control.
+
+We see a clearly treatment-related effect: After application at week 0 the 
+treated communities rapidly change treatment dependent. However to the end of 
+the experiment the treated and the control get similar again, which indicates a 
+'recovery'.
+
+On the righthand side we see the species names and their scores. The more 
+extreme the scores the more this species contributed to the plotted differences. 
+However, you cannot directly infer from these species scores which species are more
+susceptible. For example \textit{Gammarus pulex} (gammapule) has a relatively 
+low scores, although it's response pattern (Figure \ref{fig:prc}) show a strong
+response with no recovery. PRC displays global pattern in the community, but the 
+pattern of \textit{G. pulex} is different from most other species, therefore it 
+gets a lower species scores.
+
+\begin{marginfigure}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=\maxwidth]{graphics/pyrifos_gammarus} 
+
+}
+
+
+
+\end{knitrout}
+
+\caption{Different responses of \textit{Gammarus pulex} and \textit{Caenis horaria} during 
+the experiment to chlorpyrifos treatments.}
+\label{fig:prc}
+\end{marginfigure}
+
+
+We can also look at the numerical output\sidenote{Only a shortened output is 
+given here.} for this plot using the summary method:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{pyrifos_prc_sum}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## 
+## Call:
+## prc(response = pyrifos, treatment = dose, time = week) 
+## Species scores:
+##    Simve    Ostsp    NauLa    Strvi binitent caenhora 
+##   -2.688   -2.312   -4.847   -3.070    1.951   -5.768 
+## caenluct cloedipt hytuinae ablaphmo cepogoae chaoobsc 
+##   -2.376   -4.734   -2.316   -2.993   -2.555   -2.442 
+## mystloni 
+##   -2.998 
+## 
+## Coefficients for dose + week:dose interaction
+## which are contrasts to dose 0 
+## rows are dose, columns are week
+##          -4     -1    0.1       1      2      4
+## 0.1 0.07218 0.1375 0.1020 0.04068 0.2101 0.1364
+## 0.9 0.08106 0.1935 0.1936 0.47699 0.4977 0.4306
+## 6   0.16616 0.1232 0.4539 1.15638 1.0835 1.1511
+## 44  0.13979 0.1958 0.7308 1.26088 1.2978 1.4627
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+
+The output of prc() gives us more detailed information about the RDA model:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{pyrifos_prc}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## Call: prc(response = pyrifos, treatment = dose,
+## time = week)
+## 
+##               Inertia Proportion Rank
+## Total         288.992      1.000     
+## Conditional    63.349      0.219   10
+## Constrained    96.684      0.335   44
+## Unconstrained 128.959      0.446   77
+## Inertia is variance 
+## 
+## Eigenvalues for constrained axes:
+##  RDA1  RDA2  RDA3  RDA4  RDA5  RDA6  RDA7  RDA8 
+## 25.28  8.30  6.04  4.77  4.15  3.86  3.59  3.33 
+## 
+## Eigenvalues for unconstrained axes:
+##   PC1   PC2   PC3   PC4   PC5   PC6   PC7   PC8 
+## 17.16  9.19  7.58  6.06  5.73  4.84  4.52  4.10 
+## (Showed only 8 of all 77 unconstrained eigenvalues)
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+We see that 
+21.9
+\% of the variance can be attributed to time (Conditional),
+33.5
+\% can be explaind by the treatment regime (Constrained) and 
+44.6
+\% of residual variance (Unconstrained), which cannot be explained by time and 
+treatment.
+
+The first RDA axis has an eigenvalue of 
+25.3. If we divide this eigenvalue by the sum
+of all eigenvalues, we get the proportion of explained variance which is displayed
+on the first axis\sidenote{rda() (and therefore als prc()) returns a huge object 
+with all kind of information stored in it. See ?cca.object for the internal structure. 
+Here I directly access the eigenvalues from this object}:
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{pyrifos_prc}\hlopt{$}\hlstd{CCA}\hlopt{$}\hlstd{eig[}\hlnum{1}\hlstd{]}\hlopt{/}\hlkwd{sum}\hlstd{(pyrifos_prc}\hlopt{$}\hlstd{CCA}\hlopt{$}\hlstd{eig)} \hlopt{*} \hlnum{100}
+\end{alltt}
+\begin{verbatim}
+##  RDA1 
+## 26.15
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+The significance of the PRC diagram can be tested via permuations.
+However observations from a experimental ditch are not independent, since the same ditch was measured repeatedly during the experiment. 
+We have to take this into account: each ditch represents a time-series.
+We will permute the whole series of one ditch, keeping the temporal order.
+
+For example, if we have 3 ditches observed for 4 weeks:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##    ditch week
+## 1      1    1
+## 2      1    2
+## 3      1    3
+## 4      1    4
+## 5      2    1
+## 6      2    2
+## 7      2    3
+## 8      2    4
+## 9      3    1
+## 10     3    2
+## 11     3    3
+## 12     3    4
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+One possible permutation would be
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##    ditch week
+## 9      3    1
+## 10     3    2
+## 11     3    3
+## 12     3    4
+## 1      1    1
+## 2      1    2
+## 3      1    3
+## 4      1    4
+## 5      2    1
+## 6      2    2
+## 7      2    3
+## 8      2    4
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+
+To setup such a permutation scheme we use the permute package, which automatically loaded with vegan:
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{control} \hlkwb{=} \hlkwd{how}\hlstd{(}\hlkwc{plots} \hlstd{=} \hlkwd{Plots}\hlstd{(}\hlkwc{strata} \hlstd{= ditch,} \hlkwc{type} \hlstd{=} \hlstr{"free"}\hlstd{),}
+    \hlkwc{within} \hlstd{=} \hlkwd{Within}\hlstd{(}\hlkwc{type} \hlstd{=} \hlstr{"none"}\hlstd{),} \hlkwc{nperm} \hlstd{=} \hlnum{99}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\marginnote{
+This sets up our permutation scheme:
+\begin{description}
+  \item[plots]{We will permute ditches, without any restrictions.}
+  \item[within]{But within one ditch there will be no permutations}
+  \item[nperm]{We want 99 permutations}
+\end{description}
+}
+
+With this setup we can create a permutation matrix. 
+Each row therein is one permuation, the values are the rownumbers of the original data set.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{set.seed}\hlstd{(}\hlnum{1234}\hlstd{)}
+\hlstd{permutations} \hlkwb{<-} \hlkwd{shuffleSet}\hlstd{(}\hlkwd{nrow}\hlstd{(pyrifos),} \hlkwc{control} \hlstd{= control)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+This can be passed to permutest, testing the first eigenvalue of our model.
+\sidenote{At the moment the permute-package isn't fully hooked up into vegan. vegan is in active development and hopefully in the future we will be able to directly pass our permutation scheme.}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{mod_perm} \hlkwb{<-} \hlkwd{permutest}\hlstd{(pyrifos_prc,} \hlkwc{permutations} \hlstd{= permutations,}
+    \hlkwc{first} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlstd{mod_perm}
+\end{alltt}
+\begin{verbatim}
+## 
+## Permutation test for rda 
+## 
+## Call: prc(response = pyrifos, treatment = dose,
+## time = week)
+## Permutation test for first constrained eigenvalue
+## Pseudo-F:	 15.1 (with 1, 77 Degrees of Freedom)
+## Significance:	 0.01 
+## Based on 99 permutations under reduced model.
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+We see that our first axis shows us a statistically significant amount of variation. 
+The minimum p-value that we could get is 0.01 (=1/no. of permutations).
+\todo{Hier noch mehr erklären}.
+
+\subsection{Effects per week}
+
+We may also be interested at which time-points there is an effect on communities.
+
+
+\subsection{Other methods}
+
+Other methods to analyse mesocosm experiments include:
+
+\begin{description}
+  \item[multivariate GLMs]{\cite{warton_distance-based_2011, wang_mvabund-_2012} In R: mvabund-package.}
+  \item[trait-based indicators]{\cite{liess_traits_2011} Currently no package, but look at rspear-package.}
+  \item[community endpoints]{\cite{sanchez-bayo_evaluation_2012} Can use vegan for all computations.}
+\end{description}
 
 
 
 
 \section{Species Sensitivity Distributions}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{require}\hlstd{(fitdistrplus)}
+\hlcom{# or}
+\hlkwd{require}\hlstd{(drc)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
 
 
 
