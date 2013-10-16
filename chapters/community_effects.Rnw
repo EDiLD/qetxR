@@ -2,8 +2,13 @@
 
 \section{Species Richness}
 
-\section{Analyzing mesocosm data}
 
+<<>>=
+data(abu)
+abu
+@
+
+\section{Analyzing mesocosm data}
 \subsection{Example data}
 Here we will analyze the pyrifos data set from \citet{van_den_brink_principal_1999} which is shipped with the vegan package. 
 \todo{Describe experiment}

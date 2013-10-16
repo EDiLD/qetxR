@@ -6,3 +6,9 @@
 \caption{LD50. Source: \url{http://xkcd.com/1260/}}
 \label{fig:ld50}
 \end{marginfigure}
+
+<<lc50_load>>=
+data(salt)
+head(salt)
+@
+
