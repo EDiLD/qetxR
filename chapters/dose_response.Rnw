@@ -1,2 +1,8 @@
 \chapter{Lethal and Other Quantal Responses to Stress}
 \section{Fitting dose-response models}
+
+\begin{marginfigure}[5\baselineskip]
+\includegraphics[width=\linewidth]{ld50.png}
+\caption{LD50. Source: \url{http://xkcd.com/1260/}}
+\label{fig:ld50}
+\end{marginfigure}
