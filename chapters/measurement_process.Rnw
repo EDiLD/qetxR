@@ -1,6 +1,6 @@
 \chapter{The Measurement Process}
 \section{Winsorized Mean and Standard Deviation}
-
+\subsection{Example data}
 The following sulfate concentrations (mg/L) were measured during a routine water quality survey of the Savannah River (South Carolina). 
 The data is available in the \verb|qetx| package \sidenote{Note that in this case you do not have to assign the data to a name.}:
 
@@ -20,14 +20,12 @@ hist(so4, breaks = 7,
 \caption{A histogramm of the so4 data.}
 \end{marginfigure}
 
-
 <<so4_summary>>=
 so4
 length(so4)
 mean(so4)
 sd(so4)
 @
-
 
 <<so4_summary2, echo=FALSE>>=
 n <- length(so4)
@@ -37,17 +35,17 @@ s <- sd(so4)
 
 So there are \Sexpr{n} measurements with a mean of \Sexpr{round(m, 2)} mg/L and a standard deviation of \Sexpr{round(s, 2)} mg/L. 
 
+\subsection{Winsorization}
 Suppose we have a detection limit of 2.5 mg/L and want to winsorize values below LOD, i.e. replace the two lowest values by 2.6 mg/L and the two highest values by 7.7 mg/L.
 
-\newpage
-
-Happily there is function in the \verb|qetx| to do this for us: \verb|winsor()|.
+Happily there is function in the \verb|qetx|-package to do this for us: \verb|winsor()|.
 This function takes a vector of values and a second argument specifying how many values should be winsorized (either by giving a LOD-value or the number of values on each side) \sidenote{Look at the source of this function -~type the function name into the console~- to see which computations are done.}.
 
 <<so4_winsor>>=
 so4_w <- winsor(so4, lod=2.5)
 so4_w
 @
+
 This give the expected results, moreover we see that on each end two observations where modified \sidenote{stored within the attribute 'width' of the resulting vector. 
 \bf{TODO: verbatim within sidenote}.}.
 

@@ -7,6 +7,9 @@
 \label{fig:ld50}
 \end{marginfigure}
 
+\subsection{Example data}
+
+\cite{newman_enhancing_1992}
 <<lc50_load>>=
 data(salt)
 head(salt)

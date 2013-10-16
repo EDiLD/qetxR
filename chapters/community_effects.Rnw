@@ -1,12 +1,13 @@
 \chapter{Community Effects}
 
 \section{Species Richness}
-
+\subsection{Example data}
 
 <<>>=
 data(abu)
 abu
 @
+
 
 \section{Analyzing mesocosm data}
 \subsection{Example data}
