@@ -11,7 +11,7 @@ data(so4)
 
 \begin{marginfigure}
 \vspace{10mm}
-<<so4_hist, dev='pdf', out.width='\\linewidth', echo=FALSE>>=
+<<so4_hist, out.width='\\linewidth', echo=FALSE>>=
 hist(so4, breaks = 7, 
      col = 'steelblue', 
      xlab = expression(paste(SO[4], " [mg/L]")),

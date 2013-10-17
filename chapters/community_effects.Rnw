@@ -42,13 +42,14 @@ pyrifos_prc <- prc(response = pyrifos, treatment = dose, time = week)
 pyrifos_prc_sum <- summary(pyrifos_prc, scaling = 1)
 @
 
-<<pyrifos_plot_src, dev='pdf', out.width='\\linewidth', eval=FALSE>>=
+<<pyrifos_plot_src, out.width='\\linewidth', eval=FALSE>>=
 plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1, scaling = 1)
 @
 
 \begin{figure}
-<<pyrifos_plot, dev='pdf', out.width='\\linewidth', echo=FALSE, fig.width=8>>=
-plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1,scaling=1, lwd = 2, cex = 1.2)
+<<pyrifos_plot, out.width='\\linewidth', echo=FALSE, fig.width=6, figadj=NULL>>=
+plot(pyrifos_prc, select = abs(pyrifos_prc_sum$sp) > 1,scaling=1, 
+     lwd = 2.5, cex.lab = 1.3, cex.axis = 1.2)
 @
 \caption[Principal response curves (PRC) of pyrifos data]{Principal response curves (PRC) with species weights for the pyrifos data set indicating effects of the insecticide on the invertebrate community.}
 \label{fig:prc}
@@ -67,7 +68,7 @@ For example \textit{Gammarus pulex} (gammapule) has a relatively low scores, alt
 PRC displays global pattern in the community, but the pattern of \textit{G. pulex} is different from most other species, therefore it gets a lower species score.
 
 \begin{marginfigure}
-<<pyrifos_gammarus, echo=FALSE, fig.width=7, fig.height=3.5>>=
+<<pyrifos_gammarus, echo=FALSE, fig.width=6, fig.height=3, out.width='\\linewidth'>>=
 df <- data.frame(pyrifos_env, gammpule = pyrifos$gammpule, caenhora = pyrifos$caenhora)
 require(reshape2)
 dfm <- melt(df)
@@ -132,7 +133,7 @@ We have to take this into account: each ditch represents a time-series.
 We will permute the whole series of one ditch, keeping the temporal order (see Tab. \ref{tab:perm}).
 
 \begin{margintable}
-  \caption{3 ditches observed for 4 weeks and a possible permutation.}
+  \caption[One restricted permutation]{3 ditches observed for 4 weeks and a possible permutation.}
   \begin{tabular}{ccc}
   Week & Ditch & Perm \\ 
   1 & 1 & 3 \\ 
@@ -187,7 +188,7 @@ mod_perm
 
 \begin{marginfigure}
 <<pyrifos_explvar, echo=FALSE, fig.width=7, fig.height=5>>=
-barplot(pyrifos_prc$CCA$eig[1:6]/sum(pyrifos_prc$CCA$eig)*100, ylab='Explained variance [%]', las = 2, 
+barplot(pyrifos_prc$CCA$eig[1:6]/sum(pyrifos_prc$CCA$eig)*100, ylab='Proportion of explained variance', las = 2, 
 col=c('steelblue', rep('grey', 5)))
 @
 \caption[PRC - Explained variance]{Proportion of explained variance of the first 6 RDA-axes. 

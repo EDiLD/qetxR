@@ -37,3 +37,4 @@ knitr.sty
 
 # keep only .Rnw and pdf
 .tex
+*tikz*
