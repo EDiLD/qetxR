@@ -2,16 +2,52 @@
 \section{Fitting dose-response models}
 
 \begin{marginfigure}[5\baselineskip]
-\includegraphics[width=\linewidth]{ld50.png}
+\includegraphics[width=.95\linewidth]{fix/ld50.png}
 \caption{LD50. Source: \url{http://xkcd.com/1260/}}
 \label{fig:ld50}
 \end{marginfigure}
 
 \subsection{Example data}
+\citet{newman_enhancing_1992} exposed mosquitofish \textit{Gambusia holbrooki} to a series of NaCl concentrations for 96h. The data is available from the \verb|qetx| package.
 
-\cite{newman_enhancing_1992}
 <<lc50_load>>=
 data(salt)
-head(salt)
+str(salt)
 @
 
+There are three columns:
+\begin{description}
+  \item[dead]{Number of fish died.}
+  \item[total]{Total number of fish exposed.}
+  \item[cocn]{NaCl concentration (g/L).}
+\end{description}
+
+First we calculate the proportion of died fish and safe it as a new column in our data.frame:
+
+<<lc50_prop>>=
+salt$prop <- salt$dead/salt$total
+@
+
+As always we first take a look at the data, to produce Fig. \ref{fig:lc50_raw}:
+
+<<lc50_plotraw_echo, dev='pdf', out.width='\\linewidth', eval=FALSE, tidy=FALSE>>=
+plot(prop ~ conc, data = salt, log = 'x', pch = 16, 
+     xlab = "NaCl-Concentration", ylab = "Proportion dead")
+@
+
+\begin{marginfigure}
+<<lc50_plotraw_eval, dev='pdf', out.width='\\linewidth', echo=FALSE>>=
+plot(prop ~ conc, data = salt, log = 'x', pch = 16,
+     xlab = "NaCl-Concentration", ylab = "Proportion dead", cex = 1.3)
+@
+\caption[Proportion of fish died at different NaCl concentrations.]{Proportion of fish died at different NaCl concentrations. The x axis is on a log scale.}
+\label{fig:lc50_raw}
+\end{marginfigure}
+
+\subsection{Introduction}
+
+
+
+
+
+\cite{ritz_toward_2010}
