@@ -3,10 +3,80 @@
 \section{Species Richness}
 \subsection{Example data}
 
-<<>>=
+Ten species were sampled at eight sites around an outfall and the number of individuals per species noted. The data is available from the \verb|qetx| package has a usual species x sites format and the rownames give the distance to the outfall\sidenote{Most functions for multivariate techniques need the data in this format - rows = samples, columns = species.}:
+
+<<SR_load>>=
 data(abu)
 abu
 @
+
+\subsection{Rarefaction}
+The total number of individuals per sample can be calculated as the row sums
+<<SR_total>>=
+rowSums(abu)
+@
+
+As the total number of individuals varies we will use the rarefaction method to
+estimate species richness at a sample size of 40 individuals.
+
+\begin{marginfigure}
+<<SR_plot1, echo=FALSE, fig.width=7, fig.height=6>>=
+rr <- rarefy(abu, 40, se = TRUE)
+distance <- as.numeric(rownames(abu))
+plot(distance, rr[1, ], type = 'b', pch = 16, 
+     xlab = 'Distance to outfall', ylab = 'Species Richness')
+@
+\caption[Species Richness along outfall]{Species Richness along outfall}
+\label{fig:SR_plot1}
+\end{marginfigure}
+
+<<SR_rare>>=
+require(vegan)
+rarefy(abu, 40, se = TRUE)
+@
+
+As can be seen species richness drops at the outfall, but increases again downstream (Fig. \ref{fig:SR_plot1}). 
+Rarefaction curves can be easily created as well as species accumulation curves:
+
+<<SR_plot2_1, eval = FALSE, tidy=FALSE>>=
+rarecurve(abu, sample = 40)
+
+require(BiodiversityR)
+env <- data.frame(dist = rownames(abu))
+rankabuncomp(abu, env, 'dist', scale = 'accumfreq')
+@
+
+\begin{figure}
+<<SR_plot2_2, echo=FALSE, fig.width=8, fig.height=4>>=
+par(mfrow = c(1,2))
+rarecurve(abu, sample = 40)
+text(par('usr')[1]+3, 0.95*par('usr')[4], labels='A')
+
+require(BiodiversityR)
+env <- data.frame(dist = rownames(abu))
+rankabuncomp(abu, env, 'dist', scale = 'accumfreq', legend = FALSE)
+text(par('usr')[1]+0.5, 0.95*par('usr')[4], labels='B')
+@
+\caption{A) Rarefaction Curve. B) Rank abundance curve}
+\label{fig:SR_plot2}
+\end{figure}
+
+
+
+\subsection{Species Diversity}
+<<Div_indices>>=
+diversity(abu, base=2) # H'
+diversity(abu, index='simpson') # lambda
+@
+
+
+
+
+
+
+
+
+
 
 
 \section{Analyzing mesocosm data}
