@@ -72,7 +72,7 @@ text(par('usr')[1]+0.5, 0.95*par('usr')[4], labels='B')
 
 
 
-\subsection{Species Diversity}
+\section{Species Diversity}
 
 Function \verb|diversity()| from the vegan package can calculate the Shannon and Simpson diversity indices \sidenote{The logarithm with base 2 is used for the Shannon index}:
 
@@ -117,12 +117,21 @@ brillouin(abu, 2)
 @
 
 
+\subsection{Species Eveness}
+Pielou`s J can be easyily calculated from the shannon index by dividing it with the number of species in each sample:
+<<Even>>=
+diversity(abu)  / log(rowSums(abu > 0)) 
+@
 
 
 
+\section{Dissimilarity indices}
 
 
+\section{Ordination techniques - PCA, RDA, NMDS, MDS, dbRDA}
+\sidenote{Further reading: \citet{borcard_numerical_2011}}
 
+\section{Testing hypotheses - PERMANOVA}
 
 
 
