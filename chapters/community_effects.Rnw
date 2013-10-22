@@ -1,5 +1,4 @@
 \chapter{Community Effects}
-
 \section{Species Richness}
 \subsection{Example data}
 
@@ -9,6 +8,18 @@ Ten species were sampled at eight sites around an outfall and the number of indi
 data(abu)
 abu
 @
+
+For our analyses we will use two packages:
+\begin{description}
+\item[vegan]{A package for Community Ecology.}
+\item[BiodiversityR]{A package forbiodiversity, suitability and community ecology analysis\sidenote{Advisable further reading: \citet{kindt_tree_2005} freely availabe at \url{http://www.worldagroforestry.org/resources/databases/tree-diversity-analysis}}}
+\end{description}
+
+<<SR_packages>>=
+require(vegan)
+require(BiodiversityR)
+@
+
 
 \subsection{Rarefaction}
 The total number of individuals per sample can be calculated as the row sums
@@ -24,14 +35,13 @@ estimate species richness at a sample size of 40 individuals.
 rr <- rarefy(abu, 40, se = TRUE)
 distance <- as.numeric(rownames(abu))
 plot(distance, rr[1, ], type = 'b', pch = 16, 
-     xlab = 'Distance to outfall', ylab = 'Species Richness')
+     xlab = 'Distance from outfall', ylab = 'Species Richness')
 @
 \caption[Species Richness along outfall]{Species Richness along outfall}
 \label{fig:SR_plot1}
 \end{marginfigure}
 
 <<SR_rare>>=
-require(vegan)
 rarefy(abu, 40, se = TRUE)
 @
 
@@ -41,7 +51,6 @@ Rarefaction curves can be easily created as well as species accumulation curves:
 <<SR_plot2_1, eval = FALSE, tidy=FALSE>>=
 rarecurve(abu, sample = 40)
 
-require(BiodiversityR)
 env <- data.frame(dist = rownames(abu))
 rankabuncomp(abu, env, 'dist', scale = 'accumfreq')
 @
@@ -64,10 +73,51 @@ text(par('usr')[1]+0.5, 0.95*par('usr')[4], labels='B')
 
 
 \subsection{Species Diversity}
-<<Div_indices>>=
-diversity(abu, base=2) # H'
-diversity(abu, index='simpson') # lambda
+
+Function \verb|diversity()| from the vegan package can calculate the Shannon and Simpson diversity indices \sidenote{The logarithm with base 2 is used for the Shannon index}:
+
+<<Div_indices1, echo=FALSE>>=
+sha <- diversity(abu, base=2)
+simp <- diversity(abu, index='simpson')
 @
+
+<<Div_indices2>>=
+diversity(abu, base=2)
+diversity(abu, index='simpson')
+@
+
+\begin{marginfigure}
+<<Div_plot1, echo=FALSE>>=
+brill <- brillouin(abu, 2)
+plot(distance, sha, type = 'b', ylim = c(0, 3), pch = 16,
+     xlab = 'Distance from outfall', ylab = 'Index value')
+lines(distance, brill, type = 'b', pch = 17, lty = 'dotted')
+lines(distance, simp, type = 'b', pch = 15, lty = 'dashed')
+legend('bottomright', legend=c('Shannon', 'Simpson', 'Brillouin'), 
+       pch = c(16, 15, 15),
+       lty = c('solid', 'dashed', 'dotted'),
+       cex = 0.8
+       )
+
+@
+\caption[Diversity indices along outfall]{Diversity indices  along outfall}
+\label{fig:div}
+\end{marginfigure}
+
+Brillouin`s index is not implemented so have to calculate it by hand:
+<<Div_brillouin1>>=
+N <- rowSums(abu)
+log(factorial(N) / apply(factorial(abu), 1, prod), base = 2) / N
+@
+
+Or use the function \verb|brillouin| from the \verb|qetx| package, which runs the two above lines of code for us:
+
+<<Div_brillouin2, eval=FALSE>>=
+brillouin(abu, 2)
+@
+
+
+
 
 
 
