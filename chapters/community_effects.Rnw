@@ -124,11 +124,21 @@ diversity(abu)  / log(rowSums(abu > 0))
 @
 
 
-
 \section{Dissimilarity indices}
+
+<<test, results='short'>>=
+data(oil)
+oil
+@
+
+
+
 
 
 \section{Ordination techniques - PCA, RDA, NMDS, MDS, dbRDA}
+
+
+
 \sidenote{Further reading: \citet{borcard_numerical_2011}}
 
 \section{Testing hypotheses - PERMANOVA}

@@ -217,15 +217,41 @@
 \mainmatter
 
 <<knitr_setup, include=FALSE, cache=FALSE>>=
-# set 
+# set graphic parameters
 knit_hooks$set(figadj = function(before, options, envir) {
     if (before) par(cex.lab = 1.3, cex=1.3, cex.axis = 1.2)  
 })
 
+# skip lines of output # from http://blogs.baylor.edu/alex_beaujean/2013/05/28/selective-lines-of-output-for-knitr-22/
+
+# can be improved...
+
+opts_chunk$set(out.top=3)
+opts_chunk$set(out.bot=2)
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+  if (options$results == 'short'){
+    x <- unlist(stringr::str_split(x, "\n")) 
+    if (!is.null(n <- options$out.top)){
+      if (length(x) > n) {
+        if (is.null(m <- options$out.bot)) m <- 0
+        x <- c(head(x, n+1), "\n....\n", tail(x, m+1))
+        x <- paste(x, collapse="\n")
+      }
+    }
+  }
+  hook_output(x, options)
+}
+)
+
+# set options for all chunks
 opts_chunk$set(fig.align='center', par=TRUE, warning=FALSE, message=FALSE, 
                error=FALSE, cache=TRUE, dev='tikz', fig.width=5, fig.height=5, fig.show='hold', figadj=TRUE)
+
+# output width
 options(width=55)
 @
+
 
 <<ggplot2_setup, cache=FALSE, echo=FALSE>>=
 require(grid)
