@@ -1,4 +1,7 @@
 \chapter{Community Effects}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Species Richness}
 \subsection{Example data}
 
@@ -72,6 +75,10 @@ text(par('usr')[1]+0.5, 0.95*par('usr')[4], labels='B')
 
 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Species Diversity}
 
 Function \verb|diversity()| from the vegan package can calculate the Shannon and Simpson diversity indices \sidenote{The logarithm with base 2 is used for the Shannon index}:
@@ -124,6 +131,11 @@ diversity(abu)  / log(rowSums(abu > 0))
 @
 
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Dissimilarity indices}
 
 <<test, results='short'>>=
@@ -134,21 +146,25 @@ oil
 
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Ordination techniques - PCA, RDA, NMDS, MDS, dbRDA}
-
-
-
 \sidenote{Further reading: \citet{borcard_numerical_2011}}
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Testing hypotheses - PERMANOVA}
 
 
 
-
-
-
-\section{Analyzing mesocosm data}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Analyzing mesocosm data - Principal Response Curves (PRC)}
 \subsection{Example data}
 Here we will analyze the pyrifos data set from \citet{van_den_brink_principal_1999} which is shipped with the vegan package. 
 \todo{Describe experiment}
@@ -170,7 +186,7 @@ pyrifos_env <- data.frame(ditch, week, dose)
 @
 
 \subsection{Introduction}
-Principle Response Curves (PRC)\cite{van_den_brink_principal_1999} are commonly used for analyzing ecotoxicological mesocosm experiments. 
+Principal Response Curves (PRC) \cite{van_den_brink_principal_1999} are commonly used for analyzing ecotoxicological mesocosm experiments. 
 PRC analyses the change of a community due to a treatment over time and is a special form of Redundancy Analysis (RDA) \cite{legendre_numerical_2013}.
 
 \subsection{Overall pattern}
@@ -225,7 +241,6 @@ ggplot(dfm, aes(x = week, y = value, col = dose)) +
 \label{fig:prc_uni}
 \end{marginfigure}
 
-
 We can also look at the numerical output\sidenote{Only a shortened output is given here.} for this plot using the summary method:
 
 <<pyrifos_sum, eval=FALSE>>=
@@ -239,8 +254,7 @@ pyrifos_prc_sum2$coefficients <- pyrifos_prc_sum2$coefficients[ ,1:6]
 pyrifos_prc_sum2
 @
 
-
-The output of prc() gives us more detailed information about the RDA model:
+The output of \verb|prc()| gives us more detailed information about the RDA model:
 <<pyrifos_expl2, eval=FALSE>>=
 pyrifos_prc
 @
@@ -272,7 +286,7 @@ We have to take this into account: each ditch represents a time-series.
 We will permute the whole series of one ditch, keeping the temporal order (see Tab. \ref{tab:perm}).
 
 \begin{margintable}
-  \caption[One restricted permutation]{3 ditches observed for 4 weeks and a possible permutation.}
+  \caption[A restricted permutation]{3 ditches observed for 4 weeks and a possible permutation.}
   \begin{tabular}{ccc}
   Week & Ditch & Perm \\ 
   1 & 1 & 3 \\ 
@@ -291,39 +305,30 @@ We will permute the whole series of one ditch, keeping the temporal order (see T
   \label{tab:perm}
 \end{margintable}
 
-To setup such a permutation scheme we use the permute package, which is automatically loaded with vegan:
+To setup such a permutation scheme we use the permute package, which is automatically loaded with vegan\sidenote{vegan is in active development and you should always use the newest version.}:
 
 <<pyrifos_permcontrol>>=
 control = how(plots = Plots(strata = ditch, type = "free"),
               within = Within(type = "none"),
               nperm = 99)
 @
-
-\marginnote{
+\nointend
 This sets up our permutation scheme:
 \begin{description}
   \item[plots]{We will permute ditches, without any restrictions.}
   \item[within]{But within one ditch there will be no permutations.}
   \item[nperm]{We want 99 permutations.}
 \end{description}
-}
 
-With this setup we can create a permutation matrix. 
-Each row therein is one permutation, the values are the row numbers of the original data set.
+\nointend
+Permutation tests for PRC can be performed using \verb|anova|:
 <<pyrifos_perm>>=
 set.seed(1234)
-permutations <- shuffleSet(nrow(pyrifos), control = control)
+anova(pyrifos_prc, permutations=control, first = TRUE)
 @
 
-This can be passed to \verb|permutest|, testing the first eigenvalue of our model.
-\sidenote{vegan is in active development and at the moment the permute-package isn't fully hooked up. Therefore we have to create a permutation matrix beforehand. In the future we will be able to pass the permutation scheme directly into vegan functions.}
-
-<<pyrifos_permutest, tidy=FALSE>>=
-mod_perm <- permutest(pyrifos_prc, 
-                      permutations = permutations, 
-                      first = TRUE)
-mod_perm
-@
+This runs a permutation test for the first eigenvalue of our model. We see that our first axis explains a statistically significant proportion of variation (Fig. \ref{fig:pyrifos_explvar}). 
+The minimum p-value that we could get is 0.01 (=1/no. of permutations).
 
 \begin{marginfigure}
 <<pyrifos_explvar, echo=FALSE, fig.width=7, fig.height=5>>=
@@ -335,19 +340,32 @@ Note that treatment and time were factors and (internally) dummy-coded, therefor
 \label{fig:pyrifos_explvar}
 \end{marginfigure}
 
-We see that our first axis explains a statistically significant proportion of variation (Fig. \ref{fig:pyrifos_explvar}). 
-The minimum p-value that we could get is 0.01 (=1/no. of permutations).
+\newpage
+You can also test the significance of each axis separately\cite{legendre_testing_2011} \sidenote{The results for the first axis are identical, but testing only the first eigenvalue is computationally more efficient since we are generally not interested in all axes.}
+<<pyrifos_perm2, eval=FALSE>>= 
+anova(pyrifos_prc, permutations=control, by = 'axis')
+@
+
+\nointend
+or the terms in the model:
+<<pyrifos_perm3>>=
+anova(pyrifos_prc, permutations=control, by = 'terms')
+@
+\nointend
+This shows that the interaction term in the model is statistically significant. Note that no output for week is generated - this is because with the specified permutation scheme the significance of a week effect cannot be assessed. 
+
 
 
 \subsection{Effects per week}
-After looking at the overall treatment effect, we may want to look at effects at individual time-points. 
+Now that we have looked at the overall effects, we may want to look at effects at individual time-points and explore the nature of the treatment x time interaction.
+
 We follow here \cite{van_den_brink_principal_1999} and use the ln-transformed nominal dose as continuous explanatory variable \sidenote{But before we have to convert dose from a factor to a numeric vector via as.numeric(levels(x))[x]}.
 
 <<pyrifos_dosetransform>>=
 dose_c <- log(20 * as.numeric(levels(dose))[dose] + 1)
 @
 
-No we can write a for-loop and compute for every week a RDA and a permutation test
+Now we can write a for-loop and compute for every week a RDA and a permutation test
 \sidenote{First we create an empty object (rdas) that will hold our results. 
 Next we run on a subset of data (based on week) a RDA and permutation test. 
 The results of both are stored as a list entry.}.
@@ -368,13 +386,12 @@ However there is also convenience function in the \verb|qetx| package:
 rdas <- rda_per_time(pyrifos, dose_c, week)
 @
 
-This returns a very big list: one list entry per week and each entry itself contains two lists: rda(RDA-Model) and anova (permutation test)).
+This returns a very big list: one list entry per week and each entry itself contains two lists: \verb|rda| (RDA-Model) and \verb|anova| (permutation test)). Digging through this manually is to .... therefore we need to extract only the information we need. 
 
-From this we have to extract the information we need. We can use \verb|sapply()| to apply a function to every list entry and return results in a vector.
-
+We can use \verb|sapply()| to apply a function to every list entry and return results in a vector.
 For example to extract the p-values for each week we can use:
 <<pyrifos_pvals>>=
-sapply(rdas, function(x) x$anova[1, 5])
+sapply(rdas, function(x) x$anova[1, 4])
 @
 
 Have a look at the object structure to write a custom function to extract the information you need:
@@ -384,25 +401,141 @@ str(rdas[[1]]$anova)
 
 
 
-
-
 \subsection{Other methods}
 
 Other methods to analyse mesocosm experiments include:
 
 \begin{description}
   \item[multivariate GLMs]{\cite{warton_distance-based_2011, wang_mvabund-_2012} In R: mvabund-package.}
-  \item[trait-based indicators]{\cite{liess_traits_2011} Currently no package, but look at rspear-package.}
-  \item[community endpoints]{\cite{sanchez-bayo_evaluation_2012} Use vegan for computations.}
+  \item[trait-based indicators]{\cite{liess_traits_2011} Currently no package, but have look at \texttt{rspear-package} (section \ref{sec:spear}).}
+  \item[community endpoints]{\cite{sanchez-bayo_evaluation_2012} You can use \texttt{vegan} for the computations.}
 \end{description}
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Species Sensitivity Distributions (SSD)}
+\subsection{Introduction}
+Species Sensitivity Distributions (SSD) are a central tool for risk assessment in ecotoxicology.
+\todo{introduction}
 
-\section{Species Sensitivity Distributions}
+\subsection{Example data}
+<<>>=
+data(ec50)
+@
+
+\subsection{Calculate SSD}
+
+We have data for a total of 35 taxa, with multiple EC50 values per taxon. We could aggregate/average these values into a single observation per taxon. 
+
+Here we aggregate using the geometric mean (with base 10).
 <<ssd_load>>=
+logmean <- function(x) 10^(mean(log10(x)))
+agg <- aggregate(ec50$conc, by = list(species = ec50$species), logmean)
+@
+
+The result is a data.frame with 35 species and the mean EC50/LC50 values.
+
+We can now fit a parametric distribution to this data using the \verb|fitdistrplus| package. 
+The choice of distribution is a crucial one - to help the choice on can fit different distributions to the data and the the one that fits best to the data. 
+Here we fit a normal, a log-normal, a logistic and a weibull distribution to the data:
+
+<<ssd_fitdist>>=
 require(fitdistrplus)
-# or
-require(drc)
+ft_norm <- fitdist(agg$x, distr='norm')
+ft_lnorm <- fitdist(agg$x, distr='lnorm')
+ft_logis <- fitdist(agg$x, distr='logis')
+ft_weib <- fitdist(agg$x, distr='weibull')
+@
+
+To compare different distributions we can use Information Criteria like AIC or BIC.
+A graphical comparison may also help decision.
+<<ssd_compare>>=
+gofstat(list(ft_norm, ft_lnorm, ft_logis, ft_weib), fitnames = c('norm', 'lnorm', 'logis', 'weib'))
+@
+
+<<ssd_compare2, eval=FALSE>>=
+cdfcomp(list(ft_norm, ft_lnorm, ft_logis, ft_weib), 
+        xlogscale=TRUE,
+        legendtext = list('norm', 'lnorm', 'logis', 'weib'), 
+        xlab='Concentration', 
+        ylab='Potentially affected fraction')
+@
+
+\begin{figure}
+<<ssd_compare2_plot, out.width='\\linewidth', figadj=NULL, echo=FALSE>>=
+cdfcomp(list(ft_norm, ft_lnorm, ft_logis, ft_weib), 
+        xlogscale=TRUE,
+        legendtext = list('norm', 'lnorm', 'logis', 'weib'), 
+        xlab='Concentration', 
+        ylab='Potentially affected fraction')
+@
+\caption[SSD]{SSD}
+\label{fig:ssd_comp}
+\end{figure}
+
+From the plot we can clearly see that the normal and logistic distributions are not appropiate here. AIC and BIC tell the same story and the log-normal distribution fits bests.
+
+The fitted distribution has the following parameters:
+<<ssd_lnorm>>=
+ft_lnorm
+@
+
+The 5\% quantile of this distribution  is the HC5 (Figure \ref{fig:ssd_res}):
+<<ssd_hc5>>=
+quantile(ft_lnorm, 0.05)
+@
+
+Confidence Intervals can be produced using bootstrap:
+<<>>=
+bt_lnorm <- bootdist(ft_lnorm, niter=999)
+quantile(bt_lnorm, 0.05)
+@
+So the lower CI for the HC5 is 0.047 (Figure \ref{fig:ssd_res}).
+
+\begin{marginfigure}
+<<SSD_plot, echo=FALSE, fig.width=7, fig.height=7>>=
+cdfcomp(ft_lnorm, xlogscale=TRUE, legendtext='lnorm',        
+        xlab='Concentration', 
+        ylab='Potentially affected fraction')
+hc5 <- quantile(ft_lnorm, 0.05)$quantiles
+abline(v = hc5)
+text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
+abline(h = 0.05, lty = 'dotted')
+
+qs <- quantile(bt_lnorm, seq(0, 1, 0.01))
+df <- data.frame(y = seq(0, 1, 0.01), upr = unlist(qs$quantCI[2, ]), lwr = unlist(qs$quantCI[1, ]))
+lines(df$upr, df$y, lty = 'dashed')
+lines(df$lwr, df$y, lty = 'dashed')
+@
+\caption[SSD]{SSD}
+\label{fig:ssd_res}
+\end{marginfigure}
+
+\verb|fitdistrplus| allows also to use interval and censored data. However first we need to restructure our dataset:
+
+<<>>=
+require(plyr)
+int <- ddply(ec50, .(species), summarise,
+             left = min(conc),
+             right = max(conc))
+@
+
+<<>>=
+ft_lnorm_int <- fitdistcens(int, 'lnorm')
+quantile(ft_lnorm_int, 0.05)
+@
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Species At Risk (SPEAR)}
+\label{sec:spear}
+<<rspearLoad>>=
+require(rspear)
 @
 
