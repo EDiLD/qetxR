@@ -187,7 +187,7 @@ pyrifos_env <- data.frame(ditch, week, dose)
 
 \subsection{Introduction}
 Principal Response Curves (PRC) \cite{van_den_brink_principal_1999} are commonly used for analyzing ecotoxicological mesocosm experiments. 
-PRC analyses the change of a community due to a treatment over time and is a special form of Redundancy Analysis (RDA) \cite{legendre_numerical_2013}.
+PRC analyses the change of a community due to a treatment over time and is a special form of Redundancy Analysis (RDA) \cite{legendre_numerical_2012}.
 
 \subsection{Overall pattern}
 With this a hand we can easily calculate and plot (Figure \ref{fig:prc}) \sidenote{Note that only species with scores greater or smaller than 1 are displayed to avoid cluttering of the plot} the PRC using the prc() function:
@@ -312,7 +312,7 @@ control = how(plots = Plots(strata = ditch, type = "free"),
               within = Within(type = "none"),
               nperm = 99)
 @
-\nointend
+\noindent
 This sets up our permutation scheme:
 \begin{description}
   \item[plots]{We will permute ditches, without any restrictions.}
@@ -320,12 +320,15 @@ This sets up our permutation scheme:
   \item[nperm]{We want 99 permutations.}
 \end{description}
 
-\nointend
+\noindent
 Permutation tests for PRC can be performed using \verb|anova|:
+
+
 <<pyrifos_perm>>=
 set.seed(1234)
 anova(pyrifos_prc, permutations=control, first = TRUE)
 @
+
 
 This runs a permutation test for the first eigenvalue of our model. We see that our first axis explains a statistically significant proportion of variation (Fig. \ref{fig:pyrifos_explvar}). 
 The minimum p-value that we could get is 0.01 (=1/no. of permutations).
@@ -346,12 +349,12 @@ You can also test the significance of each axis separately\cite{legendre_testing
 anova(pyrifos_prc, permutations=control, by = 'axis')
 @
 
-\nointend
+\noindent
 or the terms in the model:
 <<pyrifos_perm3>>=
 anova(pyrifos_prc, permutations=control, by = 'terms')
 @
-\nointend
+\noindent
 This shows that the interaction term in the model is statistically significant. Note that no output for week is generated - this is because with the specified permutation scheme the significance of a week effect cannot be assessed. 
 
 
@@ -359,14 +362,14 @@ This shows that the interaction term in the model is statistically significant. 
 \subsection{Effects per week}
 Now that we have looked at the overall effects, we may want to look at effects at individual time-points and explore the nature of the treatment x time interaction.
 
-We follow here \cite{van_den_brink_principal_1999} and use the ln-transformed nominal dose as continuous explanatory variable \sidenote{But before we have to convert dose from a factor to a numeric vector via as.numeric(levels(x))[x]}.
+We follow here Van den Brink and Ter Braak (1999) \cite{van_den_brink_principal_1999} and use the ln-transformed nominal dose as continuous explanatory variable \sidenote{But before we have to convert dose from a factor to a numeric variable via \texttt{as.numeric(levels(x))[x]}}.
 
 <<pyrifos_dosetransform>>=
 dose_c <- log(20 * as.numeric(levels(dose))[dose] + 1)
 @
 
 Now we can write a for-loop and compute for every week a RDA and a permutation test
-\sidenote{First we create an empty object (rdas) that will hold our results. 
+\sidenote{First we create an empty object (\texttt{rdas}) that will hold our results. 
 Next we run on a subset of data (based on week) a RDA and permutation test. 
 The results of both are stored as a list entry.}.
 
@@ -451,30 +454,31 @@ ft_weib <- fitdist(agg$x, distr='weibull')
 @
 
 To compare different distributions we can use Information Criteria like AIC or BIC.
-A graphical comparison may also help decision.
-<<ssd_compare>>=
-gofstat(list(ft_norm, ft_lnorm, ft_logis, ft_weib), fitnames = c('norm', 'lnorm', 'logis', 'weib'))
+A graphical comparison may also help decision (Figure \ref{fig:ssd_comp}).
+<<ssd_compare, tidy=FALSE>>=
+gofstat(list(ft_norm, ft_lnorm, ft_logis, ft_weib), 
+        fitnames = c('norm', 'lnorm', 'logis', 'weib'))
 @
 
-<<ssd_compare2, eval=FALSE>>=
+<<ssd_compare2, eval=FALSE, tidy=FALSE>>=
 cdfcomp(list(ft_norm, ft_lnorm, ft_logis, ft_weib), 
         xlogscale=TRUE,
         legendtext = list('norm', 'lnorm', 'logis', 'weib'), 
-        xlab='Concentration', 
+        xlab='EC50', 
         ylab='Potentially affected fraction')
 @
 
-\begin{figure}
+\begin{marginfigure}
 <<ssd_compare2_plot, out.width='\\linewidth', figadj=NULL, echo=FALSE>>=
 cdfcomp(list(ft_norm, ft_lnorm, ft_logis, ft_weib), 
         xlogscale=TRUE,
         legendtext = list('norm', 'lnorm', 'logis', 'weib'), 
-        xlab='Concentration', 
+        xlab='EC50', 
         ylab='Potentially affected fraction')
 @
 \caption[SSD]{SSD}
 \label{fig:ssd_comp}
-\end{figure}
+\end{marginfigure}
 
 From the plot we can clearly see that the normal and logistic distributions are not appropiate here. AIC and BIC tell the same story and the log-normal distribution fits bests.
 
@@ -489,44 +493,84 @@ quantile(ft_lnorm, 0.05)
 @
 
 Confidence Intervals can be produced using bootstrap:
-<<>>=
+<<ssd_hc5_ci>>=
 bt_lnorm <- bootdist(ft_lnorm, niter=999)
 quantile(bt_lnorm, 0.05)
 @
 So the lower CI for the HC5 is 0.047 (Figure \ref{fig:ssd_res}).
 
-\begin{marginfigure}
-<<SSD_plot, echo=FALSE, fig.width=7, fig.height=7>>=
-cdfcomp(ft_lnorm, xlogscale=TRUE, legendtext='lnorm',        
-        xlab='Concentration', 
-        ylab='Potentially affected fraction')
-hc5 <- quantile(ft_lnorm, 0.05)$quantiles
-abline(v = hc5)
-text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
-abline(h = 0.05, lty = 'dotted')
 
-qs <- quantile(bt_lnorm, seq(0, 1, 0.01))
-df <- data.frame(y = seq(0, 1, 0.01), upr = unlist(qs$quantCI[2, ]), lwr = unlist(qs$quantCI[1, ]))
-lines(df$upr, df$y, lty = 'dashed')
-lines(df$lwr, df$y, lty = 'dashed')
-@
-\caption[SSD]{SSD}
-\label{fig:ssd_res}
-\end{marginfigure}
+\verb|fitdistrplus| allows also to use interval and censored data. However first we need to restructure our dataset. 
+This create a data.frame with two columns (\verb|left| and \verb|right|) specifying the interval of the EC50 values for each species:
 
-\verb|fitdistrplus| allows also to use interval and censored data. However first we need to restructure our dataset:
-
-<<>>=
+<<ssd_cens>>=
 require(plyr)
 int <- ddply(ec50, .(species), summarise,
              left = min(conc),
              right = max(conc))
 @
 
-<<>>=
+The rest is analogue, except that were using the \verb|fitdistcens()| function instead of \verb|fitdist|:
+
+<<ssd_cens2>>=
 ft_lnorm_int <- fitdistcens(int, 'lnorm')
 quantile(ft_lnorm_int, 0.05)
 @
+
+Using the censored data results in this case in a higher HC5 (0.1124 vs. 0.0956).
+
+
+
+\subsection{Visualise results}
+
+<<SSD_plot_echo, eval=FALSE, fig.width=7, fig.height=7>>=
+# raw data and model
+cdfcomp(ft_lnorm, xlogscale=TRUE, addlegend=FALSE,
+        fitcol = 'black',
+        xlab='Concentration', 
+        ylab='Potentially affected fraction')
+
+# add hc5
+hc5 <- quantile(ft_lnorm, 0.05)$quantiles
+abline(v = hc5, lty = 'dotted')
+abline(h = 0.05, lty = 'dotted')
+text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
+
+# add ci
+qs <- quantile(bt_lnorm, seq(0, 1, 0.01))
+ci <- t(qs$quantCI)
+df <- data.frame(y = seq(0, 1, 0.01), ci)
+lines(df[ , 2], df$y, lty = 'dashed')
+lines(df[ , 3], df$y, lty = 'dashed')
+@
+
+\begin{figure}
+<<SSD_plot, echo=FALSE, fig.width=7, fig.height=7>>=
+# raw data and model
+cdfcomp(ft_lnorm, xlogscale = TRUE, addlegend = FALSE,
+        horizontals = FALSE, fitcol = 'black',
+        main = 'SSD',
+        xlab = 'Concentration', 
+        ylab = 'Potentially affected fraction')
+
+# add hc5
+hc5 <- quantile(ft_lnorm, 0.05)$quantiles
+abline(v = hc5, lty = 'dotted')
+abline(h = 0.05, lty = 'dotted')
+text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
+
+# add ci
+qs <- quantile(bt_lnorm, seq(0, 1, 0.01))
+ci <- t(qs$quantCI)
+df <- data.frame(y = seq(0, 1, 0.01), ci)
+lines(df[ , 2], df$y, lty = 'dashed')
+lines(df[ , 3], df$y, lty = 'dashed')
+@
+\caption[SSD]{SSD}
+\label{fig:ssd_res}
+\end{figure}
+
+
 
 
 
