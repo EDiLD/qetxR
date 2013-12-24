@@ -246,7 +246,8 @@ knit_hooks$set(output = function(x, options) {
 
 # set options for all chunks
 opts_chunk$set(fig.align='center', par=TRUE, warning=FALSE, message=FALSE, 
-               error=FALSE, cache=TRUE, dev='tikz', fig.width=5, fig.height=5, fig.show='hold', figadj=TRUE)
+               error=FALSE, cache=TRUE, dev='tikz', fig.width=5, fig.height=5, fig.show='hold',
+               figadj=TRUE)
 
 # output width
 options(width=55)
@@ -311,6 +312,8 @@ mytheme <- function(base_size = 12, base_family = "Helvetica") {
 }
 @
 
+<<preface, child='chapters/preface.Rnw', eval=TRUE, fig.path='graphics/'>>=
+@
 
 <<introduction, child='chapters/introduction.Rnw', eval=TRUE, fig.path='graphics/'>>=
 @
