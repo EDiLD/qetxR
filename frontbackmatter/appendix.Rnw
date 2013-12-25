@@ -1,4 +1,7 @@
 \chapter{R Session Info}
+
 <<sessionInfo>>=
 sessionInfo()
 @
+
+\todo{knitr fullwidth -> FRAMED USING floats? newer version?}

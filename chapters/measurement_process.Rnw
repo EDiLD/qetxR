@@ -39,15 +39,15 @@ So there are \Sexpr{n} measurements with a mean of \Sexpr{round(m, 2)} mg/L and 
 Suppose we have a detection limit of 2.5 mg/L and want to winsorize values below LOD, i.e. replace the two lowest values by 2.6 mg/L and the two highest values by 7.7 mg/L.
 
 Happily there is function in the \verb|qetx|-package to do this for us: \verb|winsor()|.
-This function takes a vector of values and a second argument specifying how many values should be winsorized (either by giving a LOD-value or the number of values on each side) \sidenote{Look at the source of this function -~type the function name into the console~- to see which computations are done.}.
+This function takes a vector of values and a second argument specifying how many values should be winsorized (either by giving a LOD-value or the number of values on each side) 
+\sidenote{Look at the source code of this function -~just type the function name into the console to see how computations are done.}.
 
 <<so4_winsor>>=
 so4_w <- winsor(so4, lod=2.5)
 so4_w
 @
 
-This give the expected results, moreover we see that on each end two observations where modified \sidenote{stored within the attribute 'width' of the resulting vector. 
-\bf{TODO: verbatim within sidenote}.}.
+This gives the expected results, moreover we see that on each end two observations where modified \sidenote{stored within the attribute \texttt{width} of the resulting vector.}.
 
 <<so4_w_summary>>=
 mean(so4_w)
@@ -61,7 +61,9 @@ sw <- sd(so4_w)
 sdw <- sd_winsor(so4_w)
 @
 
-The Winsorized mean $(\bar{x}_w)$ now is \Sexpr{round(mw, 2)} mg/L, the standard deviation of the modified data set (s) is \Sexpr{round(sw, 2)} mg/L and the Winsorized standard deviation $(s_w)$ \Sexpr{round(sdw, 2)} mg/L.
+The Winsorized mean $(\bar{x}_w)$ now is \Sexpr{round(mw, 2)} mg/L, \\
+the standard deviation of the modified data set (s) is \Sexpr{round(sw, 2)} mg/L and \\
+the Winsorized standard deviation $(s_w)$ \Sexpr{round(sdw, 2)} mg/L.
 
 
 
