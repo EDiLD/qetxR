@@ -1,11 +1,45 @@
 \chapter{Introduction}
 
+\begin{fullwidth}
 \textit{"This is R, programming is not optional, but rather expected."} \\
 - \url{http://wiekvoet.blogspot.de/2013/10/influence-analysis-for-repeated.html}
+\end{fullwidth}
+\vspace{2em}
+
+\section{Why R?}
+Ecotoxicology heavily relies heavily on quantitative methods, decisions are based on data and statistic gathered from experiments.
+
+This little script shows how many of the quantitative methods used in ecotoxicology can be performed using R.
+
+This is not an introductory text to R. 
+\sidenote{For introductory texts please refer to the CRAN web page \url{www.r-project.org}.}
+Readers should have already some knowledge about R - how to format and manage data, know the basic object types (vectors, matrices, dataframes, lists, factors) as well as how to create, use, access and manipulate these.
+
+
+
+\section{Structure of this book}
+This script orientates on the book 'Quantitative ecotoxicology' by Michael C. Newman \cite{newman_quantitative_2012}, however some topics were left out and some additional topics are discribed.
 
 
 
 
+\section{Functions, datasets, packages}
+Together with this book a R package was developed named \verb|qetx|. 
+Currently this package is only available on \url{https://github.com/EDiLD/qetx} and not on the official R repository (CRAN).
+However installation is easy using the \verb|devtools| package \cite{wickham_devtools:_2013}. If you do not have this package already installed get it via:
+<<install_dev, eval=FALSE>>=
+install.package(devtools)
+@
 
+Then the \verb|qetx| package can be installed and loaded with:
+<<install, eval=FALSE>>=
+require(devtools)
+install_github('qetx', 'EDiLD')
+require(qetx)
+@
+
+The package contains all datasets that will be used through this book, moreover it brings some convenience functions. Most datasets are from the real world, however all of them are already 'cleaned'
+\sidenote{This means there has been some preprocessing done to the data. For example data was brought to a useful format, unused columns have been removed, NAs and classes were correctly set, ... }
+and ready to use.
 
 
