@@ -1,5 +1,9 @@
 \chapter{Lethal and Other Quantal Responses to Stress}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Dose-response models}
+\label{sec:drc}
 
 \begin{marginfigure}[5\baselineskip]
 \includegraphics[width=.95\linewidth]{fix/ld50.png}
@@ -7,8 +11,16 @@
 \label{fig:ld50}
 \end{marginfigure}
 
+
+
+\subsection{Introduction}
+\cite{ritz_toward_2010}
+
+
+
 \subsection{Example data}
-\citet{newman_enhancing_1992} exposed mosquitofish \textit{Gambusia holbrooki} to a series of NaCl concentrations for 96h. The data is available from the \verb|qetx| package.
+\citet{newman_enhancing_1992} exposed mosquitofish \textit{Gambusia holbrooki} to a series of NaCl concentrations for 96h. 
+The data is available from the \verb|qetx| package.
 
 <<lc50_load>>=
 data(salt)
@@ -19,13 +31,13 @@ There are three columns:
 \begin{description}
   \item[dead]{Number of fish died.}
   \item[total]{Total number of fish exposed.}
-  \item[cocn]{NaCl concentration (g/L).}
+  \item[conc]{NaCl concentration (g/L).}
 \end{description}
 
 First we calculate the proportion of died fish and store it as a new column in our data.frame:
 
 <<lc50_prop>>=
-salt$prop <- salt$dead/salt$total
+salt$prop <- salt$dead / salt$total
 @
 
 As always we first take a look at the data, to produce Fig. \ref{fig:lc50_raw}:
@@ -44,12 +56,11 @@ plot(prop ~ conc, data = salt, log = 'x', pch = 16,
 \label{fig:lc50_raw}
 \end{marginfigure}
 
-\subsection{Introduction}
-\cite{ritz_toward_2010}
+
 
 \subsection{Fitting a dose-response model}
-We can use the \verb|drc|-package written by Christian Ritz and Jens Strebig to fit dose-response models to this data. T
-he main function of this package is \verb|drm()|, it uses the known formula interface to specify a model:
+We can use the \verb|drc|-package written by Christian Ritz and Jens Strebig to fit dose-response models to this data. 
+The main function of this package is \verb|drm()|, it uses the known formula interface to specify a model:
 
 <<drc1>>=
 require(drc)
@@ -60,7 +71,8 @@ So \verb|prop|, the proportion of dead fish, is the dependend variable, that we 
 Moreover there is a \verb|fct| argument which specifies which non-linear function should be fitted - in this case we requested a two-parameter log-logistic model. 
 \sidenote{use \texttt{getMeanFunctions()} to get a list of all available dose-response models.}
 
-Since there are a lot of different models available \cite{ritz_toward_2010}, we may want to fit different models, compare them and choose the one that fits best to the data. The \verb|mselect()| function does this for us, here we compare the already fitted 2 parameter log-logistic model against log-normal, weibull and gompertz models (all with 2 parameters):
+Since there are a lot of different models available \cite{ritz_toward_2010}, we may want to fit different models, compare them and choose the one that fits best to the data. 
+The \verb|mselect()| function does this for us, here we compare the already fitted 2 parameter log-logistic model against log-normal, weibull and gompertz models (all with 2 parameters):
 
 <<drc2>>=
 mselect(mod_ll2, fctList = list(LN.2(), W1.2(), G.2()))
@@ -82,7 +94,7 @@ LC50 <- ED(mod_ln2, 50, interval = "delta")
 LC50
 @
 
-The \verb|summary()| function give information the estimated parameters:
+The \verb|summary()| function gives information about the estimated parameters:
 \sidenote{Note that parameter \textit{e} is the LC50 value.}
 <<drc4>>=
 summary(mod_ln2)
@@ -92,11 +104,11 @@ summary(mod_ln2)
 To plot the fitted model the following steps are needed:
 \begin{description}
 \item[1) Plot raw data]{See figure \ref{fig:lc50_raw}.}
-\item[2) Plot predictions from the model] To visualize a model in R a general workflow is to predict from the model for a lot of (new) x-values (conc) the y-values (prop). These prediction can be added to the plot as aa line an visualize the model.
+\item[2) Plot predictions from the model]{To visualize a model in R a general workflow is to predict from the model for a lot of (new) x-values (conc) the y-values (prop). These predictions can be added to the plot as a line and visualize the model. In the same step the confidence intervals are calculated and plotted.}
 \item[3) add further information]{We may add further information to the plot, here we add dotted lines helping to spot the LC50, as well as the LC50-value to the plot.}
 \end{description}
 
-The following code create figure \ref{fig:drc_res}:\todo{caption}
+The following code creates figure \ref{fig:drc_res}:\todo{caption}
 <<drc4_plot_echo, tidy=FALSE, eval=FALSE>>=
 # raw data
 plot(prop ~ conc, data = salt, 
@@ -127,15 +139,163 @@ plot(prop ~ conc, data = salt,
 
 # predicts
 conc_pred <- seq(8, 22, 0.1)
-lines(conc_pred, 
-      predict(mod_ln2, newdata = data.frame(conc=conc_pred)))
+preds <- predict(mod_ln2, newdata = data.frame(conc=conc_pred), interval = 'confidence')
+lines(conc_pred, preds[ , 1])
+# ci
+lines(conc_pred, preds[ , 2], lty = 'dashed')
+lines(conc_pred, preds[ , 3],lty = 'dashed')
+
+
 # misc
 abline(h = 0.5, lty = 'dotted')
 abline(v = LC50[1], lty = 'dotted')
-text(LC50[1], 0.5, paste0('LC50 = ', round(LC50[1], 2)), 
-     adj = c(0,1))
+text(LC50[1], 0, paste0('LC50 = ', round(LC50[1], 2)), 
+     adj = c(0,0))
 @
 \caption[drc]{drc }
 \label{fig:drc_res}
 \end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Control Mortality}
+\subsection{Introduction}
+Sometimes a certain level of mortality in a control group is unavoidable. 
+However there exist different rules how much control mortality is acceptable, e.g. under the OECD Guidelines 202 \todo{citation} a test is only valid if control mortality is below 10 \%.
+
+There are different to deal with control mortality:
+\begin{description}
+\item[Ignore]{One can simple ignore the control mortality.}
+\item[Adjust]{One could use Abbott`s formula to adjust the proportions dying in each exposure to account for the control mortality:
+$$ p_c = \frac{p - p_0}{1 - p_0}$$}
+where $p_c$ is the corrected proportion, $p$ the original proportion and $p_0$ the proportion dead in the control group.
+\item[Model]{One could also model the control mortality. 
+In the previous section we used a 2-parameter log-normal model, were the upper and lower limit of the model were fixed a 0 resp. 1. 
+However the model could be expanded to a 3-parameter model, were the lower limit is also estimated from the data.
+}
+\end{description}
+
+
+
+\subsection{Example data}
+
+Since the data from the previous section had no control group, we will use another dataset here.
+\todo{citation} ... studied the lethal effects of PAH compounds released during oil spills. Therefore they exposed grass shrimp (\textit{Palaemonetes pugio}) to a range of naphthalene concentrations.
+The data has also three columns: concentration, number of dead animals, total number of animals.
+
+\begin{marginfigure}
+<<naphta_raw_plot, echo=FALSE>>=
+data(naphta)
+naphta$prop <- naphta$dead / naphta$total
+plot(naphta$conc, naphta$prop, pch = 16, xlab = expression(paste("Concentration (",
+    mu, "g/L)")), ylab = "Proportion Dead", main = "Raw data")
+@
+\caption{naphta}
+\label{fig:naphta_raw}
+\end{marginfigure}
+
+<<naphta_raw>>=
+data(naphta)
+naphta$prop <- naphta$dead / naphta$total
+head(naphta)
+@
+
+
+
+\subsection{Estimate Control Mortality}
+The mean control mortality in this case 1.28 \%:
+<<naphta_mort>>=
+contr_m <- mean(naphta$prop[naphta$conc == 0])
+contr_m
+@
+
+To get a confidence intervall based on the t-distribution we can use the \verb|t.test()| function
+\sidenote{To extract the actual values from this output, you need to inspect the \texttt{contr\_m} object via \texttt{str(contr\_m)}. 
+The confidence interval can be extracted via \texttt{contr\_m2\$conf.int}}:
+<<naphta_mort2>>=
+( contr_m2 <- t.test(naphta$prop[naphta$conc == 0]) )
+@
+
+
+
+\subsection{Control mortality in dose-response models}
+\subsubsection{Ignore}\\
+
+First we fit like in the previous section a 2-parameter log-logistic model to the raw data
+\sidenote{The model selection was skipped here. The 2-parameter log-logistic model fits good to this data. 
+See section \ref{sec:drc}.}:
+
+<<naphta_ignore>>=
+require(drc)
+mod_ignore <- drm(prop ~ conc, data = naphta, fct = LL.2())
+ED(mod_ignore, 50, interval = "delta")
+@
+
+\subsubsection{Adjust} \\
+
+Using Abbott`s formula we create a new column with corrected proportions:
+
+<<naphta_adjust>>=
+naphta$prop_corr <- (naphta$prop - contr_m) / (1 - contr_m)
+@
+
+Note that because we are substracting the mean this may produce negative proportions.
+Since this is not meaningful we set them to zero:
+
+<<naptha_adjust2>>=
+naphta$prop_corr[naphta$prop_corr < 0] <- 0
+@
+
+The resulting model is:
+<<naptha_adjust3>>=
+mod_adjust <- drm(prop_corr ~ conc, data = naphta, fct = LL.2())
+ED(mod_adjust, 50, interval = "delta")
+@
+
+
+\subsubsection{Model} \\
+
+To fit a log-logistic model, were the upper limit is fixed to 1 and the lower limit is estimated from the data we can use the \verb|LL.3u| function:
+
+<<naptha_model>>=
+mod_model <- drm(prop ~ conc, data = naphta, fct = LL.3u())
+ED(mod_model, 50, interval = "delta")
+summary(mod_model)
+@
+The summary output has one parameter more then the LL.2() model (compare to section \ref{sec:drc}).
+So the lower limit (c) is estimated to be 0.0069, however this is not statistically significant from zero.
+
+We can compare this model to the model with only 2 parameters using an F test.
+<<naptha_model2>>=
+mod_model2 <- drm(prop ~ conc, data = naphta, fct = LL.2())
+anova(mod_model, mod_ignore, details = FALSE)
+@
+We see that the models are not statistically different, and we could stick with the 2 parameter model since this additional paramter brings no improvement.
+
+\begin{marginfigure}
+<<control_summary, echo=FALSE, fig.width=6, fig.height=5>>=
+plotdf <- data.frame(rbind(ED(mod_ignore, 50, interval = "delta", display=FALSE),
+                ED(mod_adjust, 50, interval = "delta", display=FALSE),
+                ED(mod_model, 50, interval = "delta", display=FALSE)))
+plotdf$method <- factor(c('ignore', 'adjust', 'model'), levels = c('ignore', 'adjust', 'model'))
+
+require(ggplot2)
+ggplot(plotdf, aes(y = method, x = Estimate)) +
+  geom_point(size = 5) +
+  geom_errorbarh(aes(xmax = Upper, xmin = Lower), height = 0.3) +
+  mytheme() +
+  xlab('EC50')
+@
+\caption{EC50 compared}
+\label{fig:contr_sum}
+\end{marginfigure}
+
+Comparing the results of the methods, ignoring control mortality results in the lowest EC50, followed by the modelling approach and adjusting gives the highest EC50. 
+However the confidence interval for the modelling is much higher the for the other two methods.
+\sidenote{This can be attributed to the additional parameter that needs to be estimated from the data.}
+
+
 
