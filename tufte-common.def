@@ -399,7 +399,8 @@
 % Paragraph indentation and separation for normal text
 \newcommand{\@tufte@reset@par}{%
   \setlength{\RaggedRightParindent}{1.0pc}%
-  \setlength{\parindent}{1pc}%
+%  \setlength{\parindent}{1pc}%
+  \setlength{\parindent}{0pt}% changed by ES
   \setlength{\parskip}{0pt}%
 }
 \@tufte@reset@par
