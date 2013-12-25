@@ -52,7 +52,7 @@ plot(prop ~ conc, data = salt, log = 'x', pch = 16,
 plot(prop ~ conc, data = salt, log = 'x', pch = 16,
      xlab = "NaCl-Concentration", ylab = "Proportion dead", cex = 1.3)
 @
-\caption[Proportion of fish died at different NaCl concentrations.]{Proportion of fish died at different NaCl concentrations. Note the x axis is on a log scale.}
+\caption[Proportion of dead fish died at different NaCl concentrations.]{Proportion of fish died at different NaCl concentrations. Note the x axis is on a log scale.}
 \label{fig:lc50_raw}
 \end{marginfigure}
 
@@ -108,7 +108,7 @@ To plot the fitted model the following steps are needed:
 \item[3) add further information]{We may add further information to the plot, here we add dotted lines helping to spot the LC50, as well as the LC50-value to the plot.}
 \end{description}
 
-The following code creates figure \ref{fig:drc_res}:\todo{caption}
+The following code creates figure \ref{fig:drc_res}:
 <<drc4_plot_echo, tidy=FALSE, eval=FALSE>>=
 # raw data
 plot(prop ~ conc, data = salt, 
@@ -152,7 +152,7 @@ abline(v = LC50[1], lty = 'dotted')
 text(LC50[1], 0, paste0('LC50 = ', round(LC50[1], 2)), 
      adj = c(0,0))
 @
-\caption[drc]{drc }
+\caption[Dose-response curve of NaCl on mosquitofish.]{Dose-response curve showing the mortality of mosquitofish \textit{Gambusia holbrooki} due to NaCl after 96 h.}
 \label{fig:drc_res}
 \end{figure}
 
@@ -193,7 +193,7 @@ naphta$prop <- naphta$dead / naphta$total
 plot(naphta$conc, naphta$prop, pch = 16, xlab = expression(paste("Concentration (",
     mu, "g/L)")), ylab = "Proportion Dead", main = "Raw data")
 @
-\caption{naphta}
+\caption{Mortality of grass shrimp (\textit{Palaemonetes pugio}) exposed to naphtalene.}
 \label{fig:naphta_raw}
 \end{marginfigure}
 
@@ -221,8 +221,7 @@ The confidence interval can be extracted via \texttt{contr\_m2\$conf.int}}:
 
 
 
-\subsection{Control mortality in dose-response models}
-\subsubsection{Ignore}\\
+\subsection{Ignore Control mortality}
 
 First we fit like in the previous section a 2-parameter log-logistic model to the raw data
 \sidenote{The model selection was skipped here. The 2-parameter log-logistic model fits good to this data. 
@@ -234,8 +233,9 @@ mod_ignore <- drm(prop ~ conc, data = naphta, fct = LL.2())
 ED(mod_ignore, 50, interval = "delta")
 @
 
-\subsubsection{Adjust} \\
 
+
+\subsection{Adjust for Control mortality}
 Using Abbott`s formula we create a new column with corrected proportions:
 
 <<naphta_adjust>>=
@@ -256,7 +256,7 @@ ED(mod_adjust, 50, interval = "delta")
 @
 
 
-\subsubsection{Model} \\
+\subsection{Model Control mortality}
 
 To fit a log-logistic model, were the upper limit is fixed to 1 and the lower limit is estimated from the data we can use the \verb|LL.3u| function:
 
@@ -289,13 +289,13 @@ ggplot(plotdf, aes(y = method, x = Estimate)) +
   mytheme() +
   xlab('EC50')
 @
-\caption{EC50 compared}
+\caption[EC50 values of different methods to account for control mortality.]{EC50 values (with 95\% confidence intervals) as derived from different methods accounting for control mortality.}
 \label{fig:contr_sum}
 \end{marginfigure}
 
 Comparing the results of the methods, ignoring control mortality results in the lowest EC50, followed by the modelling approach and adjusting gives the highest EC50. 
 However the confidence interval for the modelling is much higher the for the other two methods.
-\sidenote{This can be attributed to the additional parameter that needs to be estimated from the data.}
+\sidenote{This can be mostly attributed to the additional parameter that needs to be estimated from the data.}
 
 
 

@@ -166,8 +166,10 @@ oil
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Analyzing mesocosm data - Principal Response Curves (PRC)}
 \subsection{Example data}
-Here we will analyze the pyrifos data set from \citet{van_den_brink_principal_1999} which is shipped with the vegan package. 
-\todo{Describe experiment}
+Here we will analyze the pyrifos data set of Van den Brink and Ter Braak (1999) \cite{van_den_brink_principal_1999} which is shipped with the vegan package. 
+Twelve experimental ditches were used in this experiment: Four ditches served as control and the remaining eight were treated in duplicates once with in the insecticide chlorpyrifos at doses of 0.1, 0.9, 6 and 44 \textmu g / L. 
+Invertebrates were sampled 11 times from week -4 pre-treatment through week 24 post-treatment. A total of 178 taxa were identified, this resulted in a table with abundance of 132 rows (11 * 12 samples) and 178 columns (taxa).
+
 
 <<pyrifos_load>>=
 require(vegan)
@@ -175,8 +177,8 @@ data(pyrifos)
 head(pyrifos[, c(1:8)])
 @
 
-So rows correspond to samples and columns are the species (with abbreviated names), a usual species x sites matrix. 
-The column names code treatment and time, but we will create a separate data.frame with information about experimental ditch, sampling time and treatment: 
+Rows correspond to samples and columns are the species (with abbreviated names) - a usual species x sites matrix as used in community ecology.
+The column names code treatment and time, but we will create a separate data.frame with variables about experimental ditch, sampling time and treatment: 
 
 <<pyrifos_env>>=
 ditch <- gl(12, 1, length=132)
@@ -216,12 +218,6 @@ The farther apart from the x-axis the more different are the communities compare
 We see a clearly treatment-related effect: After application at week 0 the treated communities rapidly change treatment dependent. 
 However to the end of the experiment the treated and the control get similar again, which indicates a 'recovery'.
 
-On the right-hand side we see the species names and their scores. 
-The more extreme the scores the more this species contributed to the plotted pattern. 
-However, you cannot directly infer from these species scores which species are more susceptible. 
-For example \textit{Gammarus pulex} (gammapule) has a relatively low scores, although it's response pattern (Figure \ref{fig:prc_uni}) shows a strong response, but with no recovery. 
-PRC displays global pattern in the community, but the pattern of \textit{G. pulex} is different from most other species, therefore it gets a lower species score.
-
 \begin{marginfigure}
 <<pyrifos_gammarus, echo=FALSE, fig.width=6, fig.height=5, out.width='\\linewidth'>>=
 df <- data.frame(pyrifos_env, gammpule = pyrifos$gammpule, caenhora = pyrifos$caenhora)
@@ -242,6 +238,13 @@ ggplot(dfm, aes(x = week, y = value, col = dose)) +
 \caption{Responses of \textit{G. pulex} and \textit{C. horaria} to chlorpyrifos.}
 \label{fig:prc_uni}
 \end{marginfigure}
+
+On the right-hand side we see the species names and their scores. 
+The more extreme the scores the more this species contributed to the plotted pattern. 
+However, you cannot directly infer from these species scores which species are more susceptible. 
+For example \textit{Gammarus pulex} (gammapule) has a relatively low scores, although it's response pattern (Figure \ref{fig:prc_uni}) shows a strong response, but with no recovery. 
+PRC displays global pattern in the community, but the pattern of \textit{G. pulex} is different from most other species, therefore it gets a lower species score.
+
 
 We can also look at the numerical output for this plot using the summary method
 \sidenote{Only a shortened output is given here.}:
@@ -289,7 +292,7 @@ We have to take this into account: each ditch represents a time-series.
 We will permute the whole series of one ditch, keeping the temporal order (see Tab. \ref{tab:perm}).
 
 \begin{margintable}
-  \caption[A restricted permutation]{3 ditches observed for 4 weeks and a possible permutation.}
+  \caption[A restricted permutation]{3 ditches observed for 4 weeks and a possible permutation for this data.}
   \begin{tabular}{ccc}
   Week & Ditch & Perm \\ 
   1 & 1 & 3 \\ 
@@ -425,19 +428,35 @@ Other methods to analyse mesocosm experiments include:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Species Sensitivity Distributions (SSD)}
 \subsection{Introduction}
-Species Sensitivity Distributions (SSD) are a central tool for risk assessment in ecotoxicology.
-\todo{introduction}
+Species Sensitivity Distributions (SSD) are a central tool for risk assessment in ecotoxicology. 
+Species show different sensitivity to chemicals and the variation between species can be described by a statistical distribution.
+A concentration at which x\% of species are affected can be derived from SSDs ($HC_x$). Usually a HC5 is derived (with 95\% confidence interval).
+% and should protect 95% of species with 50% confidence (95% confidence for lower limit.)
 
 \subsection{Example data}
+Acute 48- to 96-hour laboratory EC50/LC50 values for Chlorpyrifos (CAS 2921882) of freshwater insects/spiders were retrieved from the US EPA ECOTOX database. The dataset covers 35 taxa with a total 138 EC50 values:
+
 <<>>=
 data(ec50)
+head(ec50)
 @
 
+
+
 \subsection{Calculate SSD}
+We have data for a total of 35 taxa, with multiple EC50 values per taxon. 
+To incorporate multiple species values in our analysis, we need to summarise/aggrate these these values into a single value per taxon.
 
-We have data for a total of 35 taxa, with multiple EC50 values per taxon. We could aggregate/average these values into a single observation per taxon. 
+Possible aggregation functions are \cite{wheeler_species_2002}:
+\begin{enumerate}
+\item include only the single most sensitive value for each
+species.
+\item geometric mean species summaries.
+\item arithmetic mean species summaries.
+\end{enumerate}
 
-Here we aggregate using the geometric mean (with base 10).
+Here we aggregate using the geometric mean (with base 10):
+\sidenote{Since there is not predifined function for the geometric mean, we define one for ourselves.}
 <<ssd_load>>=
 logmean <- function(x) 10^(mean(log10(x)))
 agg <- aggregate(ec50$conc, by = list(species = ec50$species), logmean)
@@ -480,7 +499,7 @@ cdfcomp(list(ft_norm, ft_lnorm, ft_logis, ft_weib),
         xlab='EC50', 
         ylab='Potentially affected fraction')
 @
-\caption[SSD]{SSD}
+\caption{Different distributions fitted to chlorpyrifos EC50 values.}
 \label{fig:ssd_comp}
 \end{marginfigure}
 
@@ -504,8 +523,10 @@ quantile(bt_lnorm, 0.05)
 So the lower CI for the HC5 is 0.047 (Figure \ref{fig:ssd_res}).
 
 
-\verb|fitdistrplus| allows also to use interval and censored data. However first we need to restructure our dataset. 
-This create a data.frame with two columns (\verb|left| and \verb|right|) specifying the interval of the EC50 values for each species:
+However instead of aggregating data into a single value for each species, we could also use the interval/spread of EC50 values per species.
+\verb|fitdistrplus| can also handle interval and censored data. \todo{citation}
+However first we need to restructure our dataset:
+We need a data.frame with two columns (\verb|left| and \verb|right|) specifying the interval of the EC50 values for each species:
 
 <<ssd_cens>>=
 require(plyr)
@@ -524,6 +545,7 @@ quantile(ft_lnorm_int, 0.05)
 \sidenote{Using the censored data results in this case in a higher HC5 (0.1124 vs. 0.0956). However this is not a general rule.}
 
 
+
 \subsection{Visualise results}
 To visualize our results we need to
 
@@ -533,13 +555,13 @@ To visualize our results we need to
 \item[3) add further information]{We may add further information to the plot, here we add dotted lines helping to spot the HC5, as well as the HC5-value to the plot.}
 \end{description}
 
-The following code produces figure \ref{fig:ssd_res}:\todo{caption}
+The following code produces figure \ref{fig:ssd_res}:
 <<SSD_plot_echo, eval=FALSE, fig.width=7, fig.height=7, tidy=FALSE>>=
 # raw data and model
 cdfcomp(ft_lnorm, xlogscale = TRUE, addlegend = FALSE,
         horizontals = FALSE, fitcol = 'black',
-        main = 'SSD',
-        xlab = 'Concentration', 
+        main = 'Chlorpyrifos - SSD',
+        xlab = 'EC50', 
         ylab = 'Potentially affected fraction')
 
 # add CI
@@ -561,8 +583,8 @@ text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
 # raw data and model
 cdfcomp(ft_lnorm, xlogscale = TRUE, addlegend = FALSE,
         horizontals = FALSE, fitcol = 'black',
-        main = 'SSD',
-        xlab = 'Concentration', 
+        main = 'Chlorpyrifos - SSD',
+        xlab = 'EC50', 
         ylab = 'Potentially affected fraction')
 
 # add ci
@@ -578,7 +600,10 @@ abline(v = hc5, lty = 'dotted')
 abline(h = 0.05, lty = 'dotted')
 text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
 @
-\caption[SSD]{SSD}
+\caption[Species sensitivity distributions (SSD) for freshwater invertebrates exposed to Chlorpyrifos.]{Species sensitivity distributions (SSD) for freshwater invertebrates exposed to Chlorpyrifos.
+Dashed lines represent the 95\% bootstrap Confidence Interval.
+EC50s were derived from the ECOTOX database.
+}
 \label{fig:ssd_res}
 \end{figure}
 
