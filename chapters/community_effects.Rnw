@@ -223,7 +223,7 @@ For example \textit{Gammarus pulex} (gammapule) has a relatively low scores, alt
 PRC displays global pattern in the community, but the pattern of \textit{G. pulex} is different from most other species, therefore it gets a lower species score.
 
 \begin{marginfigure}
-<<pyrifos_gammarus, echo=FALSE, fig.width=6, fig.height=3, out.width='\\linewidth'>>=
+<<pyrifos_gammarus, echo=FALSE, fig.width=6, fig.height=5, out.width='\\linewidth'>>=
 df <- data.frame(pyrifos_env, gammpule = pyrifos$gammpule, caenhora = pyrifos$caenhora)
 require(reshape2)
 dfm <- melt(df)
@@ -235,13 +235,16 @@ ggplot(dfm, aes(x = week, y = value, col = dose)) +
   geom_smooth(se = FALSE) +
   facet_wrap(~variable) +
   ylab('Abundance') +
-  mytheme()
+  mytheme() +
+  theme(legend.position = "top", legend.box = "horizontal") +
+  guides(col = guide_legend('Treatment', title.position='top'))
 @
 \caption{Responses of \textit{G. pulex} and \textit{C. horaria} to chlorpyrifos.}
 \label{fig:prc_uni}
 \end{marginfigure}
 
-We can also look at the numerical output\sidenote{Only a shortened output is given here.} for this plot using the summary method:
+We can also look at the numerical output for this plot using the summary method
+\sidenote{Only a shortened output is given here.}:
 
 <<pyrifos_sum, eval=FALSE>>=
 pyrifos_prc_sum
@@ -317,7 +320,8 @@ This sets up our permutation scheme:
 \begin{description}
   \item[plots]{We will permute ditches, without any restrictions.}
   \item[within]{But within one ditch there will be no permutations.}
-  \item[nperm]{We want 99 permutations.}
+  \item[nperm]{We request 99 permutations.
+  \sidenote{We use here only 99 permutations for demonstration, so our best achievable p-value is 1/100 = 0.01. Usually 1000 (10000) or more permuations should be used (giving a minimal p-value of 1/1000 = 0.001).}}
 \end{description}
 
 \noindent
@@ -517,31 +521,39 @@ ft_lnorm_int <- fitdistcens(int, 'lnorm')
 quantile(ft_lnorm_int, 0.05)
 @
 
-Using the censored data results in this case in a higher HC5 (0.1124 vs. 0.0956).
-
+\sidenote{Using the censored data results in this case in a higher HC5 (0.1124 vs. 0.0956). However this is not a general rule.}
 
 
 \subsection{Visualise results}
+To visualize our results we need to
 
-<<SSD_plot_echo, eval=FALSE, fig.width=7, fig.height=7>>=
+\begin{description}
+\item[1) plot the raw data and the fitted distribution] {we can use \verb|cdfcomp()| for this, see figure \ref{fig:ssd_comp}.}
+\item[2) plot confidence intervals]{We already computed them using bootstrap, now we only need to extract the information.}
+\item[3) add further information]{We may add further information to the plot, here we add dotted lines helping to spot the HC5, as well as the HC5-value to the plot.}
+\end{description}
+
+The following code produces figure \ref{fig:ssd_res}:\todo{caption}
+<<SSD_plot_echo, eval=FALSE, fig.width=7, fig.height=7, tidy=FALSE>>=
 # raw data and model
-cdfcomp(ft_lnorm, xlogscale=TRUE, addlegend=FALSE,
-        fitcol = 'black',
-        xlab='Concentration', 
-        ylab='Potentially affected fraction')
+cdfcomp(ft_lnorm, xlogscale = TRUE, addlegend = FALSE,
+        horizontals = FALSE, fitcol = 'black',
+        main = 'SSD',
+        xlab = 'Concentration', 
+        ylab = 'Potentially affected fraction')
 
-# add hc5
-hc5 <- quantile(ft_lnorm, 0.05)$quantiles
-abline(v = hc5, lty = 'dotted')
-abline(h = 0.05, lty = 'dotted')
-text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
-
-# add ci
+# add CI
 qs <- quantile(bt_lnorm, seq(0, 1, 0.01))
 ci <- t(qs$quantCI)
 df <- data.frame(y = seq(0, 1, 0.01), ci)
 lines(df[ , 2], df$y, lty = 'dashed')
 lines(df[ , 3], df$y, lty = 'dashed')
+
+# add HC5
+hc5 <- quantile(ft_lnorm, 0.05)$quantiles
+abline(v = hc5, lty = 'dotted')
+abline(h = 0.05, lty = 'dotted')
+text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
 @
 
 \begin{figure}
@@ -553,18 +565,18 @@ cdfcomp(ft_lnorm, xlogscale = TRUE, addlegend = FALSE,
         xlab = 'Concentration', 
         ylab = 'Potentially affected fraction')
 
-# add hc5
-hc5 <- quantile(ft_lnorm, 0.05)$quantiles
-abline(v = hc5, lty = 'dotted')
-abline(h = 0.05, lty = 'dotted')
-text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
-
 # add ci
 qs <- quantile(bt_lnorm, seq(0, 1, 0.01))
 ci <- t(qs$quantCI)
 df <- data.frame(y = seq(0, 1, 0.01), ci)
 lines(df[ , 2], df$y, lty = 'dashed')
 lines(df[ , 3], df$y, lty = 'dashed')
+
+# add hc5
+hc5 <- quantile(ft_lnorm, 0.05)$quantiles
+abline(v = hc5, lty = 'dotted')
+abline(h = 0.05, lty = 'dotted')
+text(0.1, 0.9, paste0('HC5 = ', round(hc5, 3)), adj = 0)
 @
 \caption[SSD]{SSD}
 \label{fig:ssd_res}
@@ -582,4 +594,6 @@ lines(df[ , 3], df$y, lty = 'dashed')
 <<rspearLoad>>=
 require(rspear)
 @
+
+\cite{liess_analyzing_2005}
 

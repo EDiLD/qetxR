@@ -1,16 +1,10 @@
 \chapter{Introduction}
 
-%This is R, programming is not optional, but rather expected. [http://wiekvoet.blogspot.de/2013/10/influence-analysis-for-repeated.html]
+\textit{"This is R, programming is not optional, but rather expected."} \\
+- \url{http://wiekvoet.blogspot.de/2013/10/influence-analysis-for-repeated.html}
 
 
-<<install, eval=FALSE>>=
-require(devtools)
-install_github('qetx', 'EDiLD')
-@
 
-<<load>>=
-require(qetx)
-@
 
 
 
