@@ -1,7 +1,9 @@
 \chapter{R Session Info}
-
+\begin{mdframed}
 <<sessionInfo>>=
 sessionInfo()
 @
+\end{mdframed}
 
 \todo{knitr fullwidth -> FRAMED USING floats? newer version?}
+\todo{section on newpages!}

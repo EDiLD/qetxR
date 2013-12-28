@@ -30,13 +30,13 @@ qetxR.Rproj
 *.out
 *.synctex.gz
 *concordance.tex
-*.pdf
+
 
 # knitr
 cache/*
-knitr.sty
-
-# keep only .Rnw
-*.tex
 *tikz*
 /graphics/*
+
+# track only .Rnw
+*.pdf
+*.tex

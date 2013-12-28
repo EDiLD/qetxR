@@ -24,6 +24,7 @@ This script orientates on the book 'Quantitative ecotoxicology' by Michael C. Ne
 
 
 \section{Functions, datasets, packages}
+\index{qetx-package}
 Together with this book a R package was developed named \verb|qetx|. 
 Currently this package is only available on \url{https://github.com/EDiLD/qetx} and not on the official R repository (CRAN).
 However installation is easy using the \verb|devtools| package \cite{wickham_devtools:_2013}. If you do not have this package already installed get it via:
@@ -38,7 +39,11 @@ install_github('qetx', 'EDiLD')
 require(qetx)
 @
 
-The package contains all datasets that will be used through this book, moreover it brings some convenience functions. Most datasets are from the real world, however all of them are already 'cleaned'
+<<load, echo=FALSE>>=
+require(qetx)
+@
+
+This package contains all datasets that will be used through this book, moreover it brings some convenience functions. Most datasets are from the real world, however all of them are already 'cleaned'
 \sidenote{This means there has been some preprocessing done to the data. For example data was brought to a useful format, unused columns have been removed, NAs and classes were correctly set, ... }
 and ready to use.
 

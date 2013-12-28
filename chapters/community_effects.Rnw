@@ -25,6 +25,7 @@ require(BiodiversityR)
 
 
 \subsection{Rarefaction}
+\index{Rarefaction}
 The total number of individuals per sample can be calculated as the row sums
 <<SR_total>>=
 rowSums(abu)
@@ -50,7 +51,7 @@ rarefy(abu, 40, se = TRUE)
 
 As can be seen species richness drops at the outfall, but increases again downstream (Fig. \ref{fig:SR_plot1}). 
 Rarefaction curves can be easily created as well as species accumulation curves:
-
+\index{Species accumulation curves}
 <<SR_plot2_1, eval = FALSE, tidy=FALSE>>=
 rarecurve(abu, sample = 40)
 
@@ -83,6 +84,9 @@ text(par('usr')[1]+0.5, 0.95*par('usr')[4], labels='B')
 
 Function \verb|diversity()| from the vegan package can calculate the Shannon and Simpson diversity indices \sidenote{The logarithm with base 2 is used for the Shannon index}:
 
+\index{Diversity Indices|(}
+\index{Diversity Indices!simpson}
+\index{Diversity Indices!shannon}
 <<Div_indices1, echo=FALSE>>=
 sha <- diversity(abu, base=2)
 simp <- diversity(abu, index='simpson')
@@ -111,6 +115,7 @@ legend('bottomright', legend=c('Shannon', 'Simpson', 'Brillouin'),
 \label{fig:div}
 \end{marginfigure}
 
+\index{Diversity Indices!brillouin}
 Brillouin`s index is not implemented so have to calculate it by hand:
 <<Div_brillouin1>>=
 N <- rowSums(abu)
@@ -125,12 +130,13 @@ brillouin(abu, 2)
 
 
 \subsection{Species Eveness}
+\index{Diversity Indices!eveness}
 Pielou`s J can be easyily calculated from the shannon index by dividing it with the number of species in each sample:
 <<Even>>=
 diversity(abu)  / log(rowSums(abu > 0)) 
 @
 
-
+\index{Diversity Indices|)}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -165,6 +171,7 @@ oil
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Analyzing mesocosm data - Principal Response Curves (PRC)}
+\index{Principal Response Curves|(}
 \subsection{Example data}
 Here we will analyze the pyrifos data set of Van den Brink and Ter Braak (1999) \cite{van_den_brink_principal_1999} which is shipped with the vegan package. 
 Twelve experimental ditches were used in this experiment: Four ditches served as control and the remaining eight were treated in duplicates once with in the insecticide chlorpyrifos at doses of 0.1, 0.9, 6 and 44 \textmu g / L. 
@@ -249,6 +256,7 @@ PRC displays global pattern in the community, but the pattern of \textit{G. pule
 We can also look at the numerical output for this plot using the summary method
 \sidenote{Only a shortened output is given here.}:
 
+\index{Principal Response Curves!output}
 <<pyrifos_sum, eval=FALSE>>=
 pyrifos_prc_sum
 @
@@ -286,6 +294,7 @@ Here I directly access the eigenvalues from this object}:
 pyrifos_prc$CCA$eig[1] / sum(pyrifos_prc$CCA$eig) * 100
 @
 
+\index{Principal Response Curves!Permutation tests}
 The significance of the PRC diagram can be tested via permutations.
 However observations from a experimental ditch are not independent, since the same ditch was measured repeatedly during the experiment. 
 We have to take this into account: each ditch represents a time-series.
@@ -330,17 +339,12 @@ This sets up our permutation scheme:
 \noindent
 Permutation tests for PRC can be performed using \verb|anova|:
 
-
 <<pyrifos_perm>>=
 set.seed(1234)
 anova(pyrifos_prc, permutations=control, first = TRUE)
 @
 
-
-This runs a permutation test for the first eigenvalue of our model. We see that our first axis explains a statistically significant proportion of variation (Fig. \ref{fig:pyrifos_explvar}). 
-The minimum p-value that we could get is 0.01 (=1/no. of permutations).
-
-\begin{marginfigure}
+\begin{marginfigure}[-6\baselineskip]
 <<pyrifos_explvar, echo=FALSE, fig.width=7, fig.height=5>>=
 barplot(pyrifos_prc$CCA$eig[1:6]/sum(pyrifos_prc$CCA$eig)*100, ylab='Proportion of explained variance', las = 2, 
 col=c('steelblue', rep('grey', 5)))
@@ -350,8 +354,11 @@ Note that treatment and time were factors and (internally) dummy-coded, therefor
 \label{fig:pyrifos_explvar}
 \end{marginfigure}
 
-\newpage
-You can also test the significance of each axis separately\cite{legendre_testing_2011} \sidenote{The results for the first axis are identical, but testing only the first eigenvalue is computationally more efficient since we are generally not interested in all axes.}
+This runs a permutation test for the first eigenvalue of our model. We see that our first axis explains a statistically significant proportion of variation (Fig. \ref{fig:pyrifos_explvar}). 
+The minimum p-value that we could get is 0.01 (=1/no. of permutations).
+
+You can also test the significance of each axis separately \cite{legendre_testing_2011}.
+\sidenote{The results for the first axis are identical, but testing only the first eigenvalue is computationally more efficient since we are generally not interested in all axes.}
 <<pyrifos_perm2, eval=FALSE>>= 
 anova(pyrifos_prc, permutations=control, by = 'axis')
 @
@@ -367,6 +374,7 @@ This shows that the interaction term in the model is statistically significant. 
 
 
 \subsection{Effects per week}
+\index{Principal Response Curves!Effects per timepoint}
 Now that we have looked at the overall effects, we may want to look at effects at individual time-points and explore the nature of the treatment x time interaction.
 
 We follow here Van den Brink and Ter Braak (1999) \cite{van_den_brink_principal_1999} and use the ln-transformed nominal dose as continuous explanatory variable \sidenote{But before we have to convert dose from a factor to a numeric variable via \texttt{as.numeric(levels(x))[x]}}.
@@ -421,12 +429,16 @@ Other methods to analyse mesocosm experiments include:
   \item[community endpoints]{\cite{sanchez-bayo_evaluation_2012} You can use \texttt{vegan} for the computations.}
 \end{description}
 
+\index{Principal Response Curves|)}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Species Sensitivity Distributions (SSD)}
+\index{Species Sensitivity Distributions|(}
+
 \subsection{Introduction}
 Species Sensitivity Distributions (SSD) are a central tool for risk assessment in ecotoxicology. 
 Species show different sensitivity to chemicals and the variation between species can be described by a statistical distribution.
@@ -468,6 +480,7 @@ We can now fit a parametric distribution to this data using the \verb|fitdistrpl
 The choice of distribution is a crucial one - to help the choice on can fit different distributions to the data and the the one that fits best to the data. 
 Here we fit a normal, a log-normal, a logistic and a weibull distribution to the data:
 
+\index{Species Sensitivity Distributions!distributions}
 <<ssd_fitdist>>=
 require(fitdistrplus)
 ft_norm <- fitdist(agg$x, distr='norm')
@@ -477,12 +490,13 @@ ft_weib <- fitdist(agg$x, distr='weibull')
 @
 
 To compare different distributions we can use Information Criteria like AIC or BIC.
-A graphical comparison may also help decision (Figure \ref{fig:ssd_comp}).
+
 <<ssd_compare, tidy=FALSE>>=
 gofstat(list(ft_norm, ft_lnorm, ft_logis, ft_weib), 
         fitnames = c('norm', 'lnorm', 'logis', 'weib'))
 @
 
+A graphical comparison may also help decision (Figure \ref{fig:ssd_comp}).
 <<ssd_compare2, eval=FALSE, tidy=FALSE>>=
 cdfcomp(list(ft_norm, ft_lnorm, ft_logis, ft_weib), 
         xlogscale=TRUE,
@@ -510,7 +524,8 @@ The fitted distribution has the following parameters:
 ft_lnorm
 @
 
-The 5\% quantile of this distribution  is the HC5 (Figure \ref{fig:ssd_res}):
+The 5\% quantile of this distribution is the HC5 (Figure \ref{fig:ssd_res}):
+\index{Species Sensitivity Distributions!HC5}
 <<ssd_hc5>>=
 quantile(ft_lnorm, 0.05)
 @
@@ -528,6 +543,7 @@ However instead of aggregating data into a single value for each species, we cou
 However first we need to restructure our dataset:
 We need a data.frame with two columns (\verb|left| and \verb|right|) specifying the interval of the EC50 values for each species:
 
+\index{Species Sensitivity Distributions!interval data}
 <<ssd_cens>>=
 require(plyr)
 int <- ddply(ec50, .(species), summarise,
@@ -536,7 +552,6 @@ int <- ddply(ec50, .(species), summarise,
 @
 
 The rest is analogue, except that were using the \verb|fitdistcens()| function instead of \verb|fitdist|:
-
 <<ssd_cens2>>=
 ft_lnorm_int <- fitdistcens(int, 'lnorm')
 quantile(ft_lnorm_int, 0.05)
@@ -556,6 +571,7 @@ To visualize our results we need to
 \end{description}
 
 The following code produces figure \ref{fig:ssd_res}:
+\index{Species Sensitivity Distributions!plot}
 <<SSD_plot_echo, eval=FALSE, fig.width=7, fig.height=7, tidy=FALSE>>=
 # raw data and model
 cdfcomp(ft_lnorm, xlogscale = TRUE, addlegend = FALSE,
@@ -607,6 +623,7 @@ EC50s were derived from the ECOTOX database.
 \label{fig:ssd_res}
 \end{figure}
 
+\index{Species Sensitivity Distributions|)}
 
 
 

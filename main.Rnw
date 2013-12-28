@@ -1,4 +1,4 @@
-\documentclass[a4paper]{tufte-book}
+\documentclass[12pt, a4paper]{tufte-book}
 \hypersetup{colorlinks}% uncomment this line if you prefer colored hyperlinks (e.g., for onscreen viewing)
 %%
 % Book metadata
@@ -131,6 +131,20 @@
 
 % Generates the index
 \usepackage{makeidx}
+\usepackage{showidx}
+
+\usepackage{multicol}
+\makeatletter
+\renewenvironment{theindex}
+{\begin{fullwidth}
+\small
+\chapter{\indexname}%
+}
+{
+\end{fullwidth}
+}
+\makeatother
+
 \makeindex
 
 % Todo Notes
@@ -139,8 +153,10 @@
 % url
 \usepackage{url}
 
+% test
+\usepackage{mdframed}
 
-%citations
+% citations
 % do not repeat full citations
 % http://tex.stackexchange.com/questions/45868/can-i-automatically-generate-abbreviated-citations-in-tufte-documents-after-the/45878#45878
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -196,28 +212,27 @@
 
 
 \begin{document}
-%Todo-notes
-\listoftodos
-
-% Front matter
-\frontmatter
 
 % full title page
 \maketitle
 
+% Front matter
+\frontmatter
+\pagenumbering{roman}
+
 % copyright page
-\newpage
 \input{frontbackmatter/copyright.tex}
 
 % contents
-\tableofcontents
 \begin{fullwidth}
+\tableofcontents
 \listoffigures
 \listoftables
 \end{fullwidth}
 
 % Start the main matter (normal chapters)
 \mainmatter
+\pagenumbering{arabic}
 
 <<knitr_setup, include=FALSE, cache=FALSE>>=
 ### Custom hooks
@@ -252,7 +267,7 @@ knit_hooks$set(output = function(x, options) {
 # set options for all chunks
 opts_chunk$set(par=TRUE, warning=FALSE, message=FALSE, error=FALSE, 
                cache=TRUE,
-               fig.align='center', dev='tikz', fig.width=5, fig.height=5, fig.show='hold',
+               fig.align='center', fig.width=5, fig.height=5, fig.show='hold', dev='tikz',
                figadj=TRUE)
 
 # output width
@@ -276,8 +291,8 @@ mytheme <- function(base_size = 12, base_family = "Helvetica") {
     strip.text = element_text(size = rel(0.8)),
     
     axis.line = element_blank(),
-    axis.text.x = element_text(vjust = 1, size = 20),
-    axis.text.y = element_text(hjust = 1, size = 20),
+    axis.text.x = element_text(vjust = 1, size = 15),
+    axis.text.y = element_text(hjust = 1, size = 15),
     axis.ticks = element_line(colour = "black"),
     axis.title.x = element_text(size = 25),
     axis.title.y = element_text(angle = 90, size = 25),
@@ -353,6 +368,10 @@ mytheme <- function(base_size = 12, base_family = "Helvetica") {
 \bibliography{references}
 \end{fullwidth}
 
+%index
 \printindex
+
+%Todo-notes
+\listoftodos
 
 \end{document}

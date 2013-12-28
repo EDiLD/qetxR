@@ -6,8 +6,8 @@
 \label{sec:drc}
 
 \begin{marginfigure}[5\baselineskip]
-\includegraphics[width=.95\linewidth]{fix/ld50.png}
-\caption{LD50. Source: \url{http://xkcd.com/1260/}}
+\includegraphics[width=.95\linewidth]{figures/ld50.png}
+\caption[LD50 of toxicity data.]{LD50 of toxicity data. Source: \url{http://xkcd.com/1260/}}
 \label{fig:ld50}
 \end{marginfigure}
 
@@ -42,13 +42,13 @@ salt$prop <- salt$dead / salt$total
 
 As always we first take a look at the data, to produce Fig. \ref{fig:lc50_raw}:
 
-<<lc50_plotraw_echo, dev='pdf', out.width='\\linewidth', eval=FALSE, tidy=FALSE>>=
+<<lc50_plotraw_echo, out.width='\\linewidth', eval=FALSE, tidy=FALSE>>=
 plot(prop ~ conc, data = salt, log = 'x', pch = 16, 
      xlab = "NaCl-Concentration", ylab = "Proportion dead")
 @
 
-\begin{marginfigure}
-<<lc50_plotraw_eval, dev='pdf', out.width='\\linewidth', echo=FALSE>>=
+\begin{marginfigure}[-20\baselineskip]
+<<lc50_plotraw_eval, out.width='\\linewidth', echo=FALSE>>=
 plot(prop ~ conc, data = salt, log = 'x', pch = 16,
      xlab = "NaCl-Concentration", ylab = "Proportion dead", cex = 1.3)
 @
@@ -95,7 +95,7 @@ LC50
 @
 
 The \verb|summary()| function gives information about the estimated parameters:
-\sidenote{Note that parameter \textit{e} is the LC50 value.}
+\sidenote{Note that parameter \texttt{e} is the LC50 value.}
 <<drc4>>=
 summary(mod_ln2)
 @
@@ -128,8 +128,8 @@ text(LC50[1], 0.5, paste0('LC50 = ', round(LC50[1], 2)),
      adj = c(0,1))
 @
 
-\begin{figure}
-<<drc4_plot, tidy=FALSE, echo=FALSE>>=
+\begin{figure}[h]
+<<drc4_plot, echo=FALSE, out.width='0.9\\linewidth'>>=
 # raw data
 plot(prop ~ conc, data = salt, 
      xlim = c(8, 22), ylim = c(0, 1), 
@@ -275,7 +275,7 @@ anova(mod_model, mod_ignore, details = FALSE)
 @
 We see that the models are not statistically different, and we could stick with the 2 parameter model since this additional paramter brings no improvement.
 
-\begin{marginfigure}
+\begin{marginfigure}[-10\baselineskip]
 <<control_summary, echo=FALSE, fig.width=6, fig.height=5>>=
 plotdf <- data.frame(rbind(ED(mod_ignore, 50, interval = "delta", display=FALSE),
                 ED(mod_adjust, 50, interval = "delta", display=FALSE),
@@ -293,7 +293,7 @@ ggplot(plotdf, aes(y = method, x = Estimate)) +
 \label{fig:contr_sum}
 \end{marginfigure}
 
-Comparing the results of the methods, ignoring control mortality results in the lowest EC50, followed by the modelling approach and adjusting gives the highest EC50. 
+Comparing the results of the methods (Figure \ref{fig:contr_sum}), ignoring control mortality results in the lowest EC50, followed by the modelling approach and adjusting gives the highest EC50. 
 However the confidence interval for the modelling is much higher the for the other two methods.
 \sidenote{This can be mostly attributed to the additional parameter that needs to be estimated from the data.}
 
